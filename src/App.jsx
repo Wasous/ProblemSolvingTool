@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage'; // Placeholder para futuras páginas
 import "./styles/globals.css";
+import RegisterPage from './pages/RegisterPage';
 
 function App() {
   return (
@@ -13,6 +14,9 @@ function App() {
 
         {/* Ruta para la página de login */}
         <Route path="/login" element={<LoginPage />} />
+
+        {/* Ruta para la página de registro */}
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </Router>
   );
