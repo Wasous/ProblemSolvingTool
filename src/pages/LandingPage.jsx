@@ -4,22 +4,27 @@ import Benefits from '../components/Benefits';
 import CallToAction from '../components/CallToAction';
 import Footer from '../components/Footer';
 
+
 const LandingPage = () => {
   return (
-    <div className="min-h-screen w-full flex flex-col">
-      {/* Encabezado */}
+    <div className="min-h-screen flex flex-col">
+      {/* Header fuera del contenedor limitado */}
       <Header />
-      
-      {/* Contenido principal */}
-      <main className="flex-grow">
-        <Benefits />
-        <CallToAction />
-      </main>
-      
-      {/* Pie de página */}
+
+      {/* Contenido limitado con max-width */}
+      <div className="flex-grow max-w-7xl mx-auto bg-white px-4 sm:px-6 lg:px-8">
+        <main className="py-8">
+          <Benefits />
+          <CallToAction />
+        </main>
+      </div>
+
+      {/* Footer fuera del contenedor limitado */}
       <Footer />
     </div>
   );
 };
 
 export default LandingPage;
+
+
