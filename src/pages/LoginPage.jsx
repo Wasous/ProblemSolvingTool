@@ -1,8 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const LoginPage = () => {
+  const navigate = useNavigate();
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Aquí podrías agregar lógica de validación o autenticación
+    navigate('/main'); // Redirige a la página principal después de enviar el formulario
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -12,7 +21,7 @@ const LoginPage = () => {
       <div className="flex-grow flex items-center justify-center bg-gray-50">
         <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
           <h1 className="text-2xl font-bold text-center mb-6">Iniciar Sesión</h1>
-          <form>
+          <form onSubmit={handleSubmit}>
             {/* Campo de Email */}
             <div className="mb-4">
               <label
