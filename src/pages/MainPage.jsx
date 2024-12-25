@@ -1,28 +1,6 @@
 import React from 'react';
-
-const Header = () => (
-  <header className="bg-blue-600 text-white p-4 shadow-md">
-    <div className="container mx-auto flex justify-between items-center">
-      <h1 className="text-2xl font-bold">MyApp Dashboard</h1>
-      <nav>
-        <ul className="flex space-x-4">
-          <li><a href="#" className="hover:underline">Home</a></li>
-          <li><a href="#" className="hover:underline">Projects</a></li>
-          <li><a href="#" className="hover:underline">Settings</a></li>
-          <li><a href="#" className="hover:underline text-red-400">Logout</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-);
-
-const Footer = () => (
-  <footer className="bg-gray-800 text-white p-4 mt-6">
-    <div className="container mx-auto text-center">
-      <p>&copy; 2024 MyApp. All rights reserved.</p>
-    </div>
-  </footer>
-);
+import HeaderMain from '../components/HeaderMain';
+import Footer from '../components/Footer';
 
 const Card = ({ title, description, bgColor }) => (
   <div className={`p-4 rounded-lg shadow ${bgColor}`}>
@@ -34,7 +12,7 @@ const Card = ({ title, description, bgColor }) => (
 const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <Header />
+      <HeaderMain title="Dashboard" />
 
       {/* Main Content */}
       <main className="container mx-auto p-4 flex-grow">

@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'; // Placeholder para futuras páginas
 import "./styles/globals.css";
 import RegisterPage from './pages/RegisterPage';
 import MainPage from './pages/MainPage'
+import ProjectsPage from './pages/ProjectsPage'
 
 function App() {
   return (
@@ -20,7 +21,10 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Ruta para la página principal */}
-        <Route path="/main" element={<MainPage/>} />
+        <Route path="/main" element={<MainPage />} />
+
+        {/* Ruta para la página de projectos */}
+        <Route path="/projects" element={<ProjectsPage />} />
       </Routes>
     </Router>
   );
