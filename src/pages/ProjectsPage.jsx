@@ -1,7 +1,7 @@
 import React from 'react';
-import HeaderMain from '../components/HeaderMain'; // Asegúrate de que la ruta sea correcta
-import Footer from '../components/Footer'; // Asegúrate de que la ruta sea correcta
-import ProjectRow from '../components/ProjectRow'; // Componente que representa una fila de proyecto
+import HeaderMain from '../components/HeaderMain';
+import Footer from '../components/Footer';
+import ProjectRow from '../components/ProjectRow';
 
 const ProjectsList = () => {
     const projects = [
@@ -40,6 +40,11 @@ const ProjectsList = () => {
         },
     ];
 
+    const handleProjectUpdate = (projectId, updatedData) => {
+        console.log(`Updating project ${projectId}:`, updatedData);
+        // Aquí podrías manejar la actualización en un estado global o enviar al backend
+    };
+
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col">
             {/* Header */}
@@ -50,7 +55,12 @@ const ProjectsList = () => {
                 <h1 className="text-2xl font-bold mb-4">Project List</h1>
                 <div className="space-y-4">
                     {projects.map((project, index) => (
-                        <ProjectRow key={index} {...project} />
+                        <ProjectRow
+                            key={index}
+                            project={project}
+                            projectId={index} // Usamos el índice como ID temporal
+                            onProjectUpdate={handleProjectUpdate}
+                        />
                     ))}
                 </div>
             </main>

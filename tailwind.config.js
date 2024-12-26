@@ -15,6 +15,7 @@ export default {
         textSecondary: '#6B7280',
         textClear: '#6B7280',
         textWhite: '#ffffff', // Texto gris
+        greyBackground: ' #c2dfe3'
       },
     },
   },
