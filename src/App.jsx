@@ -6,6 +6,7 @@ import "./styles/globals.css";
 import RegisterPage from './pages/RegisterPage';
 import MainPage from './pages/MainPage'
 import ProjectsPage from './pages/ProjectsPage'
+import CreateProject from './pages/CreatePage';
 
 function App() {
   return (
@@ -25,6 +26,9 @@ function App() {
 
         {/* Ruta para la página de projectos */}
         <Route path="/projects" element={<ProjectsPage />} />
+
+        {/* Ruta para la página de creación de projectos */}
+        <Route path="/newProject" element={<CreateProject />} />
       </Routes>
     </Router>
   );
