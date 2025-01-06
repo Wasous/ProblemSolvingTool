@@ -24,10 +24,10 @@ const Header = ({ title }) => {
 
         {/* Navegación */}
         <nav>
-          <ul className="flex space-x-4">
-            <li><Link to="/main" className="hover:underline">Home</Link></li>
-            <li><Link to="/projects" className="hover:underline">Projects</Link></li>
-            <li><Link to="/settings" className="hover:underline">Settings</Link></li>
+          <ul className="flex space-x-4 items-center">
+            <li><Link to="/main" className="text-white hover:text-white hover:underline">Home</Link></li>
+            <li><Link to="/projects" className="text-white hover:text-white hover:underline">Projects</Link></li>
+            <li><Link to="/settings" className="text-white hover:text-white hover:underline">Settings</Link></li>
             <li>
               <button
                 onClick={() => navigate('/')}
