@@ -7,9 +7,11 @@ import RegisterPage from './pages/RegisterPage';
 import MainPage from './pages/MainPage'
 import ProjectsPage from './pages/ProjectsPage'
 import CreateProject from './pages/CreatePage';
+import { AuthProvider } from './contexts/AuthContext.jsx';
 
 function App() {
   return (
+    <AuthProvider>
     <Router>
       <Routes>
         {/* Ruta para la página principal */}
@@ -31,6 +33,7 @@ function App() {
         <Route path="/newProject" element={<CreateProject />} />
       </Routes>
     </Router>
+    </AuthProvider>
   );
 }
 

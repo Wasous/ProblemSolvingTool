@@ -1,20 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // Accedemos a la función login desde el contexto
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/main'); // Redirige a la página principal después de enviar el formulario
+
+    // Simulación de validación básica (puedes agregar lógica real aquí)
+    if (email === 'hschilet@gmail.com' && password === '1234') {
+      login(); // Cambia el estado de autenticación a true
+      navigate('/main'); // Redirige al dashboard principal
+    } else {
+      alert('Credenciales incorrectas. Inténtalo de nuevo.');
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <Header />
+      <Header title="Solvit" isAuthenticated={false}/>
 
       {/* Contenedor del Formulario */}
       <div className="flex-grow flex items-center justify-center bg-gray-50 py-6 sm:py-12">
@@ -35,6 +46,7 @@ const LoginPage = () => {
                   autoComplete="on"
                   type="email"
                   id="email"
+                  onChange={(e) => setEmail(e.target.value)}
                   name="email"
                   required
                   className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600"
@@ -54,6 +66,7 @@ const LoginPage = () => {
                   autoComplete="on"
                   type="password"
                   id="password"
+                  onChange={(e) => setPassword(e.target.value)}
                   name="password"
                   required
                   className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600"

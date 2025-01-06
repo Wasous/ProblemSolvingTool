@@ -1,5 +1,5 @@
-import React from 'react';
-import HeaderMain from '../components/HeaderMain';
+import PropTypes from 'prop-types';
+import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const Card = ({ title, description, bgColor }) => (
@@ -9,10 +9,16 @@ const Card = ({ title, description, bgColor }) => (
   </div>
 );
 
+Card.propTypes = {
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  bgColor: PropTypes.string.isRequired
+};
+
 const Dashboard = () => {
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      <HeaderMain title="Dashboard" />
+    <div className="min-h-screen bg-gray-100 flex flex-col pt-20">
+      <Header title="Solvit" isAuthenticated={true}/>
 
       {/* Main Content */}
       <main className="container mx-auto p-4 flex-grow">

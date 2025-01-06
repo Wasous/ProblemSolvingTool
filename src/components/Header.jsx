@@ -1,18 +1,51 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
-const Header = () => {
+const Header = ({ title }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handleHeaderClick = () => {
+    // Si el usuario está autenticado, redirige a /main. Si no, redirige a /
+    navigate(isAuthenticated ? '/main' : '/');
+  };
+
   return (
-    <header className="bg-primary w-full">
-      <div className="max-w-screen-xl mx-auto flex justify-between items-center py-4 px-6">
-        <h1 className="text-xl font-bold text-textWhite">Mi App</h1>
-        <nav className="space-x-4">
-          <Link to="/" className="text-textWhite hover:underline">Inicio</Link>
-          <Link to="/login" className="text-textWhite hover:underline">Login</Link>
+    <header className="bg-blue-600 text-white p-4 shadow-md fixed top-0 left-0 w-full z-50">
+      <div className="container mx-auto flex justify-between items-center">
+        {/* H1 clicable para redirigir según autenticación */}
+        <h1
+          className="text-2xl font-bold cursor-pointer"
+          onClick={handleHeaderClick}
+        >
+          {title}
+        </h1>
+
+        {/* Navegación */}
+        <nav>
+          <ul className="flex space-x-4">
+            <li><Link to="/main" className="hover:underline">Home</Link></li>
+            <li><Link to="/projects" className="hover:underline">Projects</Link></li>
+            <li><Link to="/settings" className="hover:underline">Settings</Link></li>
+            <li>
+              <button
+                onClick={() => navigate('/')}
+                className="hover:underline text-red-400"
+              >
+                Logout
+              </button>
+            </li>
+          </ul>
         </nav>
       </div>
     </header>
   );
 };
 
+Header.propTypes = {
+  title: PropTypes.string.isRequired,
+};
+
 export default Header;
+

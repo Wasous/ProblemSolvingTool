@@ -20,7 +20,7 @@ const RegisterPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header fuera del contenedor limitado */}
-      <Header />
+      <Header title="Solvit" isAuthenticated={false}/>
     <div className="flex items-center justify-center flex-grow bg-gray-50">
       <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
         <h1 className="text-2xl font-bold text-center mb-6">Crear Cuenta</h1>
