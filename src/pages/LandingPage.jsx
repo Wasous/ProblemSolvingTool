@@ -9,7 +9,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header fuera del contenedor limitado */}
-      <Header title="Solvit" isAuthenticated={false}/>
+      <Header title="Solvit" isAuthenticated={false} />
 
       {/* Contenido limitado con max-width */}
       <div className="flex-grow max-w-7xl mx-auto bg-white px-4 sm:px-6 lg:px-8 pt-20">

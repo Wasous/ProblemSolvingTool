@@ -4,39 +4,59 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Header = ({ title }) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   const handleHeaderClick = () => {
-    // Si el usuario está autenticado, redirige a /main. Si no, redirige a /
     navigate(isAuthenticated ? '/main' : '/');
+  };
+
+  const handleLogoutClick = () => {
+    logout();
+    navigate('/');
   };
 
   return (
     <header className="bg-blue-600 text-white p-4 shadow-md fixed top-0 left-0 w-full z-50">
       <div className="container mx-auto flex justify-between items-center">
-        {/* H1 clicable para redirigir según autenticación */}
-        <h1
-          className="text-2xl font-bold cursor-pointer"
-          onClick={handleHeaderClick}
-        >
-          {title}
-        </h1>
+        {/* Título clicable */}
+        <div className="flex items-center space-x-4">
+          {/* Título fijo */}
+          <h1 className="text-2xl font-bold">{title}</h1>
 
-        {/* Navegación */}
+          {/* Botón condicional basado en isAuthenticated */}
+          {isAuthenticated && (
+            <button
+              className="bg-white text-blue-600 px-3 py-1 rounded-lg flex items-center shadow hover:bg-gray-100 hover:shadow-md transition duration-200"
+              onClick={() => navigate('/newProject')}
+              aria-label="Crear un nuevo proyecto"
+            >
+              <span className="text-lg font-bold">+</span>
+              <span className="ml-2 text-sm">Nuevo Proyecto</span>
+            </button>
+          )}
+        </div>
+        {/* Navegación Condicional */}
         <nav>
-          <ul className="flex space-x-4 items-center">
-            <li><Link to="/main" className="text-white hover:text-white hover:underline">Home</Link></li>
-            <li><Link to="/projects" className="text-white hover:text-white hover:underline">Projects</Link></li>
-            <li><Link to="/settings" className="text-white hover:text-white hover:underline">Settings</Link></li>
-            <li>
-              <button
-                onClick={() => navigate('/')}
-                className="hover:underline text-red-400"
-              >
-                Logout
-              </button>
-            </li>
-          </ul>
+          {isAuthenticated ? (
+            <ul className="flex space-x-4 items-center">
+              <li><Link to="/main" className="text-white hover:text-white hover:underline">Home</Link></li>
+              <li><Link to="/projects" className="text-white hover:text-white hover:underline">Projects</Link></li>
+              <li><Link to="/settings" className="text-white hover:text-white hover:underline">Settings</Link></li>
+              <li>
+                <button
+                  onClick={handleLogoutClick}
+                  className="text-red-400 hover:underline"
+                >
+                  Logout
+                </button>
+              </li>
+            </ul>
+          ) : (
+            <ul className="flex space-x-4 items-center">
+              <li><Link to="/login" className="text-white hover:text-white hover:underline">Login</Link></li>
+              <li><Link to="/register" className="text-white hover:text-white hover:underline">Register</Link></li>
+            </ul>
+          )}
         </nav>
       </div>
     </header>
