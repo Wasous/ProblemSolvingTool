@@ -1,5 +1,5 @@
 import React from 'react';
-import HeaderMain from '../components/HeaderMain';
+import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ProjectRow from '../components/ProjectRow';
 
@@ -46,9 +46,9 @@ const ProjectsList = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col">
+        <div className="min-h-screen bg-gray-100 flex flex-col pt-20">
             {/* Header */}
-            <HeaderMain title="Projects" />
+            <Header title="Projects" />
 
             {/* Main Content */}
             <main className="container mx-auto p-4 flex-grow">
