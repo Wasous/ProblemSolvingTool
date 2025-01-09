@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CreateForm = () => {
     // Hooks deben estar dentro del componente
@@ -9,10 +10,11 @@ const CreateForm = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [priority, setPriority] = useState('Medium');
+    const navigate = useNavigate();
 
     const handleCreateProject = () => {
         console.log({ projectName, description, methodology, stakeholders, startDate, endDate, priority });
-        alert('Project created successfully!');
+        navigate('/DMAIC')
     };
 
     return (

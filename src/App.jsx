@@ -7,32 +7,37 @@ import RegisterPage from './pages/RegisterPage';
 import MainPage from './pages/MainPage'
 import ProjectsPage from './pages/ProjectsPage'
 import CreateProject from './pages/CreatePage';
+import DMAIC from './pages/DMAIC';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 
 function App() {
   return (
     <AuthProvider>
-    <Router>
-      <Routes>
-        {/* Ruta para la página principal */}
-        <Route path="/" element={<LandingPage />} />
+      <Router>
+        <Routes>
+          {/* Ruta para la página principal */}
+          <Route path="/" element={<LandingPage />} />
 
-        {/* Ruta para la página de login */}
-        <Route path="/login" element={<LoginPage />} />
+          {/* Ruta para la página de login */}
+          <Route path="/login" element={<LoginPage />} />
 
-        {/* Ruta para la página de registro */}
-        <Route path="/register" element={<RegisterPage />} />
+          {/* Ruta para la página de registro */}
+          <Route path="/register" element={<RegisterPage />} />
 
-        {/* Ruta para la página principal */}
-        <Route path="/main" element={<MainPage />} />
+          {/* Ruta para la página principal */}
+          <Route path="/main" element={<MainPage />} />
 
-        {/* Ruta para la página de projectos */}
-        <Route path="/projects" element={<ProjectsPage />} />
+          {/* Ruta para la página de projectos */}
+          <Route path="/projects" element={<ProjectsPage />} />
 
-        {/* Ruta para la página de creación de projectos */}
-        <Route path="/newProject" element={<CreateProject />} />
-      </Routes>
-    </Router>
+          {/* Ruta para la página de creación de projectos */}
+          <Route path="/newProject" element={<CreateProject />} />
+
+          {/* Ruta para la página de creación de projectos */}
+          <Route path="/DMAIC" element={<DMAIC />} />
+
+        </Routes>
+      </Router>
     </AuthProvider>
   );
 }
