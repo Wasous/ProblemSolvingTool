@@ -1,11 +1,13 @@
 import PropTypes from 'prop-types';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation  } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Header = ({ title }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
-
+  const location = useLocation();
+  console.log('Current location:', location);
+  
   const handleHeaderClick = () => {
     navigate(isAuthenticated ? '/main' : '/');
   };
@@ -21,10 +23,14 @@ const Header = ({ title }) => {
         {/* Título clicable */}
         <div className="flex items-center space-x-4">
           {/* Título fijo */}
-          <h1 className="text-2xl font-bold">{title}</h1>
+          <h1
+            className="text-2xl font-bold cursor-pointer"
+            onClick={handleHeaderClick}>
+              {title}
+          </h1>
 
           {/* Botón condicional basado en isAuthenticated */}
-          {isAuthenticated && (
+          {location.pathname !== '/newProject' && isAuthenticated && (
             <button
               className="bg-white text-blue-600 px-3 py-1 rounded-lg flex items-center shadow hover:bg-gray-100 hover:shadow-md transition duration-200"
               onClick={() => navigate('/newProject')}
