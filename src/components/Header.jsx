@@ -30,7 +30,7 @@ const Header = ({ title }) => {
           </h1>
 
           {/* Botón condicional basado en isAuthenticated */}
-          {location.pathname !== '/newProject' && isAuthenticated && (
+          {location.pathname !== '/DMAIC' && location.pathname !== '/newProject' && isAuthenticated && (
             <button
               className="bg-white text-blue-600 px-3 py-1 rounded-lg flex items-center shadow hover:bg-gray-100 hover:shadow-md transition duration-200"
               onClick={() => navigate('/newProject')}
