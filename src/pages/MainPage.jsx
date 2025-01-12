@@ -18,7 +18,7 @@ Card.propTypes = {
 const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col pt-20">
-      <Header title="Solvit" isAuthenticated={true}/>
+      <Header title="Solvit" />
 
       {/* Main Content */}
       <main className="container mx-auto p-4 flex-grow">
