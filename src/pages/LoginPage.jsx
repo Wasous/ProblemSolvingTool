@@ -25,7 +25,7 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <Header title="Solvit" isAuthenticated={false}/>
+      <Header title="Solvit"/>
 
       {/* Contenedor del Formulario */}
       <div className="flex-grow flex items-center justify-center bg-gray-50 py-6 sm:py-12">

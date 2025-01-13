@@ -35,7 +35,7 @@ const DmaicMenu = ({ stages }) => {
                         ) : stage.started ? (
                             <button
                                 onClick={() => handleStageClick(stage)}
-                                className="text-sm text-green-600 hover:text-green-800 font-medium"
+                                className="text-sm text-greenText hover:text-greenTextHover font-medium"
                             >
                                 {stage.name}
                             </button>

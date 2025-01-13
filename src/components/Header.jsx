@@ -17,8 +17,8 @@ const Header = ({ title }) => {
   // Stages DMAIC con sus estados
   const dmaicStages = [
     { name: 'Define', started: true, completed: true },
-    { name: 'Measure', started: true, completed: false },
-    { name: 'Analyze', started: false, completed: false },
+    { name: 'Measure', started: true, completed: true },
+    { name: 'Analyze', started: true, completed: false },
     { name: 'Improve', started: false, completed: false },
     { name: 'Control', started: false, completed: false },
   ];
@@ -40,7 +40,7 @@ const Header = ({ title }) => {
   };
 
   return (
-    <header className="bg-blue-600 text-white p-4 shadow-md fixed top-0 left-0 w-full z-50">
+    <header className="bg-accentBg text-white p-4 shadow-md fixed top-0 left-0 w-full z-50">
       <div className="container mx-auto flex justify-between items-center">
         {/* Título clicable */}
         <div className="flex items-center space-x-4">
@@ -51,8 +51,7 @@ const Header = ({ title }) => {
             {title}
           </h1>
 
-          {/* Menú DMAIC solo en la página /DMAIC */}
-          {location.pathname === '/DMAIC' && <DmaicMenu stages={dmaicStages} />}
+          
 
           {/* Botón condicional basado en isAuthenticated */}
           {location.pathname !== '/DMAIC' && location.pathname !== '/newProject' && isAuthenticated && (
@@ -66,6 +65,8 @@ const Header = ({ title }) => {
             </button>
           )}
         </div>
+        {/* Menú DMAIC solo en la página /DMAIC */}
+        {location.pathname === '/DMAIC' && <DmaicMenu stages={dmaicStages} />}
         {/* Navegación Condicional */}
         <nav>
           {isAuthenticated ? (

@@ -11,11 +11,14 @@ export default {
         secondary: '#2563EB', // Azul más claro
         accent: '#9333EA', // Morado
         background: '#F3F4F6', // Fondo gris claro
+        accentBg: '#669bbc',
         textPrimary: '#111827', // Texto principal
         textSecondary: '#6B7280',
         textClear: '#6B7280',
         textWhite: '#ffffff', // Texto gris
-        greyBackground: ' #c2dfe3'
+        greyBackground: '#c2dfe3',
+        greenText: '#588157',
+        greenTextHover: '#3a5a40'
       },
     },
   },
