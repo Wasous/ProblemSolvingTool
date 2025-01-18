@@ -3,45 +3,46 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import IsIsNotCard from '../components/IsIsNot';
 import FloatingButton from '../components/FloatingButton';
+import RichTextCard from '../components/RichTextCard';
 
 const DMAIC = () => {
   const [isIsNotList, setIsIsNotList] = useState([
     {
-        id: 1,
-        title: "IS / IS NOT 1",
-        is: {
-          what: "Falla técnica en el sistema",
-          where: "En el almacén principal",
-          when: "Durante los fines de semana",
-          who: "Operadores del turno nocturno",
-          howMuch: "Impacta en un 20% los costos",
-        },
-        isNot: {
-          what: "No es un problema de hardware",
-          where: "No ocurre en los almacenes secundarios",
-          when: "No ocurre durante días laborables",
-          who: "No afecta al equipo de administración",
-          howMuch: "No impacta las métricas de calidad",
-        },
+      id: 1,
+      title: "IS / IS NOT 1",
+      is: {
+        what: "Falla técnica en el sistema",
+        where: "En el almacén principal",
+        when: "Durante los fines de semana",
+        who: "Operadores del turno nocturno",
+        howMuch: "Impacta en un 20% los costos",
       },
-      {
-        id: 2,
-        title: "IS / IS NOT 2",
-        is: {
-          what: "Falla técnica en el sistema",
-          where: "En el almacén principal",
-          when: "Durante los fines de semana",
-          who: "Operadores del turno nocturno",
-          howMuch: "Impacta en un 20% los costos",
-        },
-        isNot: {
-          what: "No es un problema de hardware",
-          where: "No ocurre en los almacenes secundarios",
-          when: "No ocurre durante días laborables",
-          who: "No afecta al equipo de administración",
-          howMuch: "No impacta las métricas de calidad",
-        },
+      isNot: {
+        what: "No es un problema de hardware",
+        where: "No ocurre en los almacenes secundarios",
+        when: "No ocurre durante días laborables",
+        who: "No afecta al equipo de administración",
+        howMuch: "No impacta las métricas de calidad",
       },
+    },
+    {
+      id: 2,
+      title: "IS / IS NOT 2",
+      is: {
+        what: "Falla técnica en el sistema",
+        where: "En el almacén principal",
+        when: "Durante los fines de semana",
+        who: "Operadores del turno nocturno",
+        howMuch: "Impacta en un 20% los costos",
+      },
+      isNot: {
+        what: "No es un problema de hardware",
+        where: "No ocurre en los almacenes secundarios",
+        when: "No ocurre durante días laborables",
+        who: "No afecta al equipo de administración",
+        howMuch: "No impacta las métricas de calidad",
+      },
+    },
   ]);
 
   // Esta función creará un nuevo objeto vacío para Is/Is Not
@@ -86,8 +87,10 @@ const DMAIC = () => {
       {isIsNotList.map((item) => (
         <IsIsNotCard key={item.id} data={item} onDelete={handleDeleteCard} />
       ))}
+
+      <RichTextCard />
       {/* Botón para añadir nuevo Is/IsNot */}
-      <FloatingButton addIsIsNot={handleAddIsIsNot}/>
+      <FloatingButton addIsIsNot={handleAddIsIsNot} />
 
       <Footer />
     </div>

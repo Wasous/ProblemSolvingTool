@@ -40,7 +40,17 @@ const IsIsNotCard = ({ data, onSave, onDelete }) => {
 
   return (
     <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-screen-lg mx-auto mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">{editableData.title}</h2>
+      {editionMode ? (
+        <input
+          className="text-2xl font-bold text-gray-800 mb-4 w-full p-2 border rounded"
+          value={editableData.title || 'IS / IS NOT'}
+          onChange={(e) => setEditableData({ ...editableData, title: e.target.value })}
+        />
+      ) : (
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          {editableData.title || 'IS / IS NOT'}
+        </h2>
+      )}
 
       {/* Problem Statement */}
       <div className="bg-gray-50 p-4 rounded-lg shadow-inner mb-4">
@@ -103,7 +113,7 @@ const IsIsNotCard = ({ data, onSave, onDelete }) => {
       </table>
 
       {/* Botones */}
-      <div className="mt-4 text-right space-x-4 display: flex">
+      <div className="mt-4 text-right space-x-4 justify-end display: flex">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           onClick={() => (editionMode ? handleSave() : setEditionMode(true))}
@@ -117,14 +127,14 @@ const IsIsNotCard = ({ data, onSave, onDelete }) => {
           >
             Cancel
           </button>
-          
+
         )}
         <button
-            onClick={handleDelete}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center"
+          onClick={handleDelete}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center"
         >
-            <FaTrash size={16} className="mr-2" />
-            Delete
+          <FaTrash size={16} className="mr-2" />
+          Delete
         </button>
       </div>
     </div>
