@@ -1,41 +1,65 @@
-import React from 'react';
-import { AiOutlinePlus, AiOutlinePhone, AiOutlineMail, AiOutlineMessage } from 'react-icons/ai';
+import React, { useState, useRef, useEffect } from 'react';
+import { AiOutlinePlus } from 'react-icons/ai';
 
-const FloatingButton = ( {addIsIsNot} ) => {
+const FloatingButton = ({ addIsIsNot }) => {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  // Cerrar si se hace click fuera del contenedor
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="fixed bottom-10 right-8 group flex flex-col items-center">
-      
-
-      {/* Contenedor de Sub-Botones */}
-      <div
-        className="
-          flex flex-col items-center
-          opacity-0 group-hover:opacity-100
-          scale-0 group-hover:scale-100
-          transition-all duration-300
-          mb-4
-        "
-      >
-        <button
+    <div className="fixed bottom-10 right-8 z-50" ref={containerRef}>
+      <div className="relative">
+        {/* Botón Principal (+) */}
+        <div
+          onClick={() => setOpen((prev) => !prev)}
           className="
-            bg-blue-400 text-white px-4 py-2 
-            rounded shadow-lg hover:bg-blue-600 
-            transition-all
+            w-16 h-16 rounded-full bg-blue-500
+            text-white text-3xl flex items-center justify-center
+            shadow-lg cursor-pointer
+            transition-all duration-300
           "
-          onClick={addIsIsNot}
         >
-          IS / IS NOT
-        </button>
-      </div>
-      {/* Botón Principal */}
-      <div className="
-        w-16 h-16 rounded-full bg-blue-500 
-        text-white text-3xl flex items-center justify-center 
-        shadow-lg cursor-pointer 
-        transform transition-all duration-300 
-        group-hover:translate-y-2
-      ">
-        <AiOutlinePlus />
+          <AiOutlinePlus />
+        </div>
+
+        {/* Menú (sub-botones) con animación */}
+        <div
+          className={`
+            absolute bottom-full right-0 mb-4
+            flex flex-col items-center space-y-3
+            transition-all duration-300
+            origin-bottom
+            ${open ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
+          `}
+        >
+          <button
+            className="
+              bg-blue-400 text-white px-4 py-2
+              rounded shadow-lg hover:bg-blue-600
+              transition-all w-32
+            "
+            onClick={() => {
+              addIsIsNot();
+              setOpen(false);
+            }}
+          >
+            IS / IS NOT
+          </button>
+
+          {/* Si en el futuro quieres más opciones, añádelas aquí */}
+        </div>
       </div>
     </div>
   );
