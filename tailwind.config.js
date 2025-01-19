@@ -18,7 +18,9 @@ export default {
         textWhite: '#ffffff', // Texto gris
         greyBackground: '#c2dfe3',
         greenText: '#588157',
-        greenTextHover: '#3a5a40'
+        greenTextHover: '#3a5a40',
+        yellowDark: '#e9c46a',
+        yellowDarkHover: '#E2B33C'
       },
     },
   },

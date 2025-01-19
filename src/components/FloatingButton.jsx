@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AiOutlinePlus } from 'react-icons/ai';
 
-const FloatingButton = ({ addIsIsNot }) => {
+const FloatingButton = ({ addIsIsNot, addRichText }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -36,20 +36,13 @@ const FloatingButton = ({ addIsIsNot }) => {
 
         {/* Menú (sub-botones) con animación */}
         <div
-          className={`
-            absolute bottom-full right-0 mb-4
-            flex flex-col items-center space-y-3
-            transition-all duration-300
-            origin-bottom
-            ${open ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
-          `}
+          className={`absolute bottom-full right-0 mb-4 flex flex-col items-center space-y-3 
+                      transition-all duration-300 origin-bottom
+                      ${open ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}
         >
+          {/* Botón IS / IS NOT */}
           <button
-            className="
-              bg-blue-400 text-white px-4 py-2
-              rounded shadow-lg hover:bg-blue-600
-              transition-all w-32
-            "
+            className="bg-blue-400 text-white px-4 py-2 rounded shadow-lg hover:bg-blue-600 transition-all w-32"
             onClick={() => {
               addIsIsNot();
               setOpen(false);
@@ -58,7 +51,16 @@ const FloatingButton = ({ addIsIsNot }) => {
             IS / IS NOT
           </button>
 
-          {/* Si en el futuro quieres más opciones, añádelas aquí */}
+          {/* Botón Rich Text */}
+          <button
+            className="bg-yellowDark text-white px-4 py-2 rounded shadow-lg hover:bg-yellowDarkHover transition-all w-32"
+            onClick={() => {
+              addRichText();
+              setOpen(false);
+            }}
+          >
+            Rich Text
+          </button>
         </div>
       </div>
     </div>

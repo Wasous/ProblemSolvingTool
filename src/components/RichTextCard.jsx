@@ -31,9 +31,9 @@ const formats = [
 ];
 
 const RichTextCard = ({ initialValue = '<p>¡Empieza a escribir aquí!</p>', onDelete }) => {
-    const [editionMode, setEditionMode] = useState(false);
-    const [content, setContent] = useState(initialValue);
-    const [originalContent, setOriginalContent] = useState(initialValue);
+    const [editionMode, setEditionMode] = useState(initialValue.editionMode || false);
+    const [content, setContent] = useState(initialValue.content);
+    const [originalContent, setOriginalContent] = useState(initialValue.content);
 
     // Manejar cambios en el editor
     const handleChange = (value) => {
