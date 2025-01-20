@@ -2,14 +2,11 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-const DmaicMenu = ({ stages }) => {
-    const navigate = useNavigate();
-    const [SelectedStage, setSelectedStage] = useState('Define');
-
+const DmaicMenu = ({ stages, currentStage, setCurrentStage }) => {
     // Manejar cambio de stage
     const handleStageClick = (stage) => {
         if (stage.started) {
-            setSelectedStage(stage.name);
+            setCurrentStage(stage.name);
         }
     };
 
@@ -28,14 +25,19 @@ const DmaicMenu = ({ stages }) => {
                         {stage.completed ? (
                             <button
                                 onClick={() => handleStageClick(stage)}
-                                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                                className={`text-sm font-medium ${currentStage === stage.name
+                                    ? 'bg-blue-200'
+                                    : 'text-blue-600 hover:text-blue-800'
+                                    }`}
                             >
                                 {stage.name}
                             </button>
                         ) : stage.started ? (
                             <button
                                 onClick={() => handleStageClick(stage)}
-                                className="text-sm text-greenText hover:text-greenTextHover font-medium"
+                                className={`text-sm font-medium ${currentStage === stage.name
+                                    ? 'bg-green-100'
+                                    : 'text-sm text-greenText hover:text-greenTextHover font-medium'}`}
                             >
                                 {stage.name}
                             </button>

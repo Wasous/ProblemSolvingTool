@@ -6,7 +6,19 @@ import FloatingButton from '../components/FloatingButton';
 import RichTextCard from '../components/RichTextCard';
 
 const DMAIC = () => {
-  const [cards, setCards] = useState([
+  // Estado del stage actual
+  const [currentStage, setCurrentStage] = useState('Define');
+
+  // Stages DMAIC con sus estados
+  const dmaicStages = [
+    { name: 'Define', started: true, completed: true },
+    { name: 'Measure', started: true, completed: true },
+    { name: 'Analyze', started: true, completed: false },
+    { name: 'Improve', started: false, completed: false },
+    { name: 'Control', started: false, completed: false },
+  ];
+
+  const [defineCards, setDefineCards] = useState([
     {
       id: 1,
       type: 'IS_IS_NOT',
@@ -35,6 +47,10 @@ const DMAIC = () => {
     },
   ]);
 
+  const [measureCards, setMeasureCards] = useState([]);
+  const [analyzeCards, setAnalyzeCards] = useState([]);
+  const [improveCards, setImproveCards] = useState([]);
+  const [controlCards, setControlCards] = useState([]);
   // Función para añadir una nueva tarjeta
   const handleAddCard = (type) => {
     const newId = Date.now(); // ID único
@@ -62,54 +78,218 @@ const DMAIC = () => {
       };
     }
 
-    setCards([...cards, newCard]);
+    // Actualizar el array correspondiente al currentStage
+    switch (currentStage) {
+      case 'Define':
+        setDefineCards([...defineCards, newCard]);
+        break;
+      case 'Measure':
+        setMeasureCards([...measureCards, newCard]);
+        break;
+      case 'Analyze':
+        setAnalyzeCards([...analyzeCards, newCard]);
+        break;
+      case 'Improve':
+        setImproveCards([...improveCards, newCard]);
+        break;
+      case 'Control':
+        setControlCards([...controlCards, newCard]);
+        break;
+      default:
+        console.error(`Stage desconocido: ${currentStage}`);
+    }
   };
 
 
   // Función para eliminar una tarjeta
   const handleDeleteCard = (id) => {
-    setCards((prev) => prev.filter((card) => card.id !== id));
+    setDefineCards((prev) => prev.filter((card) => card.id !== id));
   };
 
   // Función para actualizar una tarjeta (al guardar cambios)
   const handleSaveCard = (id, newData) => {
-    setCards((prev) =>
+    setDefineCards((prev) =>
       prev.map((card) => (card.id === id ? { ...card, data: newData } : card))
     );
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col pt-28">
-      <Header title="Hacer cada fase monocromatica" />
+      <Header
+        title="Hacer cada fase monocromatica"
+        currentStage={currentStage}
+        setCurrentStage={setCurrentStage}
+        dmaicStages={dmaicStages} />
 
-      {/* Render de todas las cards */}
-      {cards.map((card) => {
-        switch (card.type) {
-          case 'IS_IS_NOT':
+      {(() => {
+        switch (currentStage) {
+          case 'Define':
             return (
-              <IsIsNotCard
-                key={card.id}
-                data={card.data}
-                onDelete={() => handleDeleteCard(card.id)}
-                onSave={(newData) => handleSaveCard(card.id, newData)}
-              />
+              <>
+                {/* Render de todas las cards de Define */}
+                {defineCards.map((card) => {
+                  switch (card.type) {
+                    case 'IS_IS_NOT':
+                      return (
+                        <IsIsNotCard
+                          key={card.id}
+                          data={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newData) => handleSaveCard(card.id, newData)}
+                        />
+                      );
+                    case 'RICH_TEXT':
+                      return (
+                        <RichTextCard
+                          key={card.id}
+                          initialValue={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newContent) =>
+                            handleSaveCard(card.id, { content: newContent })
+                          }
+                        />
+                      );
+                    default:
+                      return null;
+                  }
+                })}
+              </>
             );
-          case 'RICH_TEXT':
+
+          case 'Measure':
             return (
-              <RichTextCard
-                key={card.id}
-                initialValue={card.data}
-                onDelete={() => handleDeleteCard(card.id)}
-                onSave={(newContent) =>
-                  handleSaveCard(card.id, { content: newContent })
-                }
-              />
+              <>
+                {/* Render de todas las cards de Measure */}
+                {measureCards.map((card) => {
+                  switch (card.type) {
+                    case 'IS_IS_NOT':
+                      return (
+                        <IsIsNotCard
+                          key={card.id}
+                          data={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newData) => handleSaveCard(card.id, newData)}
+                        />
+                      );
+                    case 'RICH_TEXT':
+                      return (
+                        <RichTextCard
+                          key={card.id}
+                          initialValue={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newContent) =>
+                            handleSaveCard(card.id, { content: newContent })
+                          }
+                        />
+                      );
+                    default:
+                      return null;
+                  }
+                })}
+              </>
+            );
+
+          // Casos adicionales (Analyze, Improve, Control) pueden seguir la misma estructura
+          case 'Analyze':
+            return (
+              <>
+                {/* Render de todas las cards de Analyze */}
+                {analyzeCards.map((card) => {
+                  switch (card.type) {
+                    case 'IS_IS_NOT':
+                      return (
+                        <IsIsNotCard
+                          key={card.id}
+                          data={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newData) => handleSaveCard(card.id, newData)}
+                        />
+                      );
+                    case 'RICH_TEXT':
+                      return (
+                        <RichTextCard
+                          key={card.id}
+                          initialValue={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newContent) =>
+                            handleSaveCard(card.id, { content: newContent })
+                          }
+                        />
+                      );
+                    default:
+                      return null;
+                  }
+                })}
+              </>
+            );
+          case 'Improve':
+            return (
+              <>
+                {/* Render de todas las cards de Analyze */}
+                {improveCards.map((card) => {
+                  switch (card.type) {
+                    case 'IS_IS_NOT':
+                      return (
+                        <IsIsNotCard
+                          key={card.id}
+                          data={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newData) => handleSaveCard(card.id, newData)}
+                        />
+                      );
+                    case 'RICH_TEXT':
+                      return (
+                        <RichTextCard
+                          key={card.id}
+                          initialValue={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newContent) =>
+                            handleSaveCard(card.id, { content: newContent })
+                          }
+                        />
+                      );
+                    default:
+                      return null;
+                  }
+                })}
+              </>
+            );
+          case 'Control':
+            return (
+              <>
+                {/* Render de todas las cards de Analyze */}
+                {controlCards.map((card) => {
+                  switch (card.type) {
+                    case 'IS_IS_NOT':
+                      return (
+                        <IsIsNotCard
+                          key={card.id}
+                          data={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newData) => handleSaveCard(card.id, newData)}
+                        />
+                      );
+                    case 'RICH_TEXT':
+                      return (
+                        <RichTextCard
+                          key={card.id}
+                          initialValue={card.data}
+                          onDelete={() => handleDeleteCard(card.id)}
+                          onSave={(newContent) =>
+                            handleSaveCard(card.id, { content: newContent })
+                          }
+                        />
+                      );
+                    default:
+                      return null;
+                  }
+                })}
+              </>
             );
           default:
-            return null;
+            return <p>No encontramos nada por aquí... empieza creándolo desde "+"</p>;
         }
-      })}
-
+      })()}
       {/* Botón para añadir nuevas tarjetas */}
       <FloatingButton
         addIsIsNot={() => handleAddCard('IS_IS_NOT')}

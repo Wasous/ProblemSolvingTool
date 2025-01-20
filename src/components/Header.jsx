@@ -5,23 +5,11 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import React from 'react';
 import DmaicMenu from './DmaicMenu.jsx'
 
-const Header = ({ title }) => {
+const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
   console.log('Current location:', location);
-
-  // Estado del stage actual
-  const [currentStage, setCurrentStage] = useState('Define');
-
-  // Stages DMAIC con sus estados
-  const dmaicStages = [
-    { name: 'Define', started: true, completed: true },
-    { name: 'Measure', started: true, completed: true },
-    { name: 'Analyze', started: true, completed: false },
-    { name: 'Improve', started: false, completed: false },
-    { name: 'Control', started: false, completed: false },
-  ];
 
   // Manejar cambio de stage
   const handleStageClick = (stage) => {
@@ -51,7 +39,7 @@ const Header = ({ title }) => {
             {title}
           </h1>
 
-          
+
 
           {/* Botón condicional basado en isAuthenticated */}
           {location.pathname !== '/DMAIC' && location.pathname !== '/newProject' && isAuthenticated && (
@@ -66,7 +54,11 @@ const Header = ({ title }) => {
           )}
         </div>
         {/* Menú DMAIC solo en la página /DMAIC */}
-        {location.pathname === '/DMAIC' && <DmaicMenu stages={dmaicStages} />}
+        {location.pathname === '/DMAIC' &&
+          <DmaicMenu
+            stages={dmaicStages}
+            currentStage={currentStage}
+            setCurrentStage={setCurrentStage} />}
         {/* Navegación Condicional */}
         <nav>
           {isAuthenticated ? (
