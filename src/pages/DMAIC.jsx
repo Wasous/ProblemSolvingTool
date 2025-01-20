@@ -103,7 +103,21 @@ const DMAIC = () => {
 
   // Función para eliminar una tarjeta
   const handleDeleteCard = (id) => {
-    setDefineCards((prev) => prev.filter((card) => card.id !== id));
+    const cardHandlers = {
+      Define: setDefineCards,
+      Measure: setMeasureCards,
+      Analyze: setAnalyzeCards,
+      Improve: setImproveCards,
+      Control: setControlCards,
+    };
+
+    // Si el currentStage tiene un handler, aplícalo
+    cardHandlers[currentStage]?.((prev) => prev.filter((card) => card.id !== id));
+
+    // Si no existe el currentStage, muestra un error
+    if (!cardHandlers[currentStage]) {
+      console.error(`Stage desconocido: ${currentStage}`);
+    }
   };
 
   // Función para actualizar una tarjeta (al guardar cambios)
