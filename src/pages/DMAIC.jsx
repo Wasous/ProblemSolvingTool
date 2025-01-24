@@ -72,6 +72,7 @@ const DMAIC = () => {
         id: newId,
         type: 'RICH_TEXT',
         data: {
+          title: "",
           content: "<p>Texto nuevo</p>",
           editionMode: true, // Arranca en edición
         },

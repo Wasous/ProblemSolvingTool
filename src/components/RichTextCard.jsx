@@ -14,8 +14,8 @@ const modules = {
         [{ align: [] }],
         [{ color: [] }, { background: [] }],
         ['blockquote', 'code-block'],
-        ['clean']
-    ]
+        ['clean'],
+    ],
 };
 
 const formats = [
@@ -27,33 +27,34 @@ const formats = [
     'indent',
     'align',
     'color', 'background',
-    'blockquote', 'code-block'
+    'blockquote', 'code-block',
 ];
 
-const RichTextCard = ({ initialValue = '<p>¡Empieza a escribir aquí!</p>', onDelete }) => {
+const RichTextCard = ({ initialValue, onDelete, onSave }) => {
     const [editionMode, setEditionMode] = useState(initialValue.editionMode || false);
-    const [content, setContent] = useState(initialValue.content);
-    const [originalContent, setOriginalContent] = useState(initialValue.content);
+    const [content, setContent] = useState(initialValue);
+    const [originalContent, setOriginalContent] = useState(initialValue);
 
-    // Manejar cambios en el editor
-    const handleChange = (value) => {
-        setContent(value);
+    // Manejar cambios (generalizado para cualquier propiedad de content)
+    const handleChange = (field, value) => {
+        setContent((prev) => ({ ...prev, [field]: value }));
     };
 
-    // Editar: guardamos el estado actual como originalContent para poder recuperarlo en caso de cancelar
+    // Editar
     const handleEdit = () => {
-        setOriginalContent(content);
+        setOriginalContent(content); // Guardar estado actual
         setEditionMode(true);
     };
 
     // Guardar
     const handleSave = () => {
         setEditionMode(false);
+        onSave?.(content); // Notificar al padre los cambios
     };
 
-    // Cancelar: restaurar el contenido original
+    // Cancelar
     const handleCancel = () => {
-        setContent(originalContent);
+        setContent(originalContent); // Restaurar valores originales
         setEditionMode(false);
     };
 
@@ -61,21 +62,30 @@ const RichTextCard = ({ initialValue = '<p>¡Empieza a escribir aquí!</p>', onD
     const handleDelete = () => {
         if (confirm('¿Seguro que quieres eliminar esta tarjeta?')) {
             onDelete?.();
-            // Llama a la función del padre si existe. 
-            // O puedes poner lógica aquí para ocultar/componente si no usas un padre.
         }
     };
 
     return (
         <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-screen-lg mx-auto mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Rich Text Editor</h2>
+            {/* Título */}
+            {editionMode ? (
+                <input
+                    type="text"
+                    value={content.title}
+                    onChange={(e) => handleChange('title', e.target.value)}
+                    className="text-2xl font-bold text-gray-800 mb-4 w-full p-2 border rounded"
+                    placeholder="Escribe el título..."
+                />
+            ) : (
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{content.title}</h2>
+            )}
 
             {/* Contenido o Editor */}
             {editionMode ? (
                 <ReactQuill
                     theme="snow"
-                    value={content}
-                    onChange={handleChange}
+                    value={content.content}
+                    onChange={(value) => handleChange('content', value)}
                     modules={modules}
                     formats={formats}
                     className="mb-4"
@@ -84,15 +94,13 @@ const RichTextCard = ({ initialValue = '<p>¡Empieza a escribir aquí!</p>', onD
                 <div className="mb-4 ql-snow">
                     <div
                         className="ql-editor"
-                        dangerouslySetInnerHTML={{ __html: content }}
+                        dangerouslySetInnerHTML={{ __html: content.content }}
                     />
                 </div>
             )}
 
             {/* Botones */}
             <div className="flex items-center justify-end space-x-3">
-
-                {/* Si estamos en edición: Guardar/Cancelar, si no: Editar */}
                 {editionMode ? (
                     <>
                         <button
@@ -116,7 +124,6 @@ const RichTextCard = ({ initialValue = '<p>¡Empieza a escribir aquí!</p>', onD
                         Editar
                     </button>
                 )}
-                {/* Eliminar siempre visible */}
                 <button
                     onClick={handleDelete}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center"
@@ -124,7 +131,6 @@ const RichTextCard = ({ initialValue = '<p>¡Empieza a escribir aquí!</p>', onD
                     <FaTrash size={16} className="mr-2" />
                     Delete
                 </button>
-
             </div>
         </div>
     );
