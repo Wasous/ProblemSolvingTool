@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AiOutlinePlus } from 'react-icons/ai';
 
-const FloatingButton = ({ addIsIsNot, addRichText }) => {
+const FloatingButton = ({ addIsIsNot, addRichText, addSipoc }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -59,7 +59,18 @@ const FloatingButton = ({ addIsIsNot, addRichText }) => {
               setOpen(false);
             }}
           >
-            Rich Text
+            TEXTBOX
+          </button>
+
+          {/* Botón SIPOC */}
+          <button
+            className="bg-yellowDark text-white px-4 py-2 rounded shadow-lg hover:bg-yellowDarkHover transition-all w-32"
+            onClick={() => {
+              addSipoc();
+              setOpen(false);
+            }}
+          >
+            SIPOC
           </button>
         </div>
       </div>

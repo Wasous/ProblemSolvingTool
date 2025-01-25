@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import IsIsNotCard from '../components/IsIsNot';
 import FloatingButton from '../components/FloatingButton';
 import RichTextCard from '../components/RichTextCard';
+import SipocCard from '../components/Sipoc';
 
 const DMAIC = () => {
   // Estado del stage actual
@@ -43,7 +44,20 @@ const DMAIC = () => {
     {
       id: 2,
       type: 'RICH_TEXT',
-      data: { content: "<p>Texto inicial</p>" },
+      data: { title: "", content: "<p>Texto inicial</p>" },
+    },
+    {
+      id: 3,
+      type: 'SIPOC',
+      data: {
+        title: "SIPOC Example",
+        suppliers: "Proveedores iniciales",
+        inputs: "Insumos requeridos",
+        process: "Proceso principal",
+        outputs: "Resultados esperados",
+        customers: "Clientes objetivo",
+        editionMode: true,
+      },
     },
   ]);
 
@@ -75,6 +89,20 @@ const DMAIC = () => {
           title: "",
           content: "<p>Texto nuevo</p>",
           editionMode: true, // Arranca en edición
+        },
+      };
+    } else if (type === 'SIPOC') {
+      newCard = {
+        id: newId,
+        type: 'SIPOC',
+        data: {
+          title: "",
+          suppliers: "",
+          inputs: "",
+          process: "",
+          outputs: "",
+          customers: "",
+          editionMode: true,
         },
       };
     }
@@ -164,6 +192,15 @@ const DMAIC = () => {
                           }
                         />
                       );
+                      case 'SIPOC':
+                        return (
+                          <SipocCard
+                            key={card.id}
+                            data={card.data}
+                            onDelete={() => handleDeleteCard(card.id)}
+                            onSave={(newData) => handleSaveCard(card.id, newData)}
+                          />
+                        );
                     default:
                       return null;
                   }
@@ -309,6 +346,7 @@ const DMAIC = () => {
       <FloatingButton
         addIsIsNot={() => handleAddCard('IS_IS_NOT')}
         addRichText={() => handleAddCard('RICH_TEXT')}
+        addSipoc={() => handleAddCard('SIPOC')}
       />
 
       <Footer />
