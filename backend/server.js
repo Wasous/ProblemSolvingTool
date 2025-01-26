@@ -7,6 +7,23 @@ const authRoutes = require('./routes/auth');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const { connectDB } = require('./models');
+connectDB();
+
+const User = require('./models/user');
+
+const syncDB = async () => {
+    try {
+        await User.sync(); // Crea la tabla si no existe
+        console.log('Tabla de usuarios sincronizada.');
+    } catch (error) {
+        console.error('Error al sincronizar la tabla:', error);
+    }
+};
+
+connectDB();
+syncDB();
+
 // Middlewares
 app.use(cors());
 app.use(express.json());
