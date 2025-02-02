@@ -84,49 +84,61 @@ router.post('/login', async (req, res) => {
 
 
 // REFRESH
-router.post('/refresh', (req, res) => {
-    // El cliente nos envía el refreshToken (puede ser en el body, headers, cookie, etc.)
+router.post('/refresh', async (req, res) => {
     const { refreshToken } = req.body;
     if (!refreshToken) {
         return res.status(400).json({ message: 'No se envió el refreshToken' });
     }
 
-    // Verificar si el refreshToken existe en nuestro "almacén"
-    if (!refreshTokens.includes(refreshToken)) {
-        return res.status(403).json({ message: 'Refresh token inválido o revocado' });
-    }
-
-    // Validar el refreshToken con jwt
-    jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, userData) => {
-        if (err) {
-            return res.status(403).json({ message: 'Token expirado o inválido' });
+    try {
+        // Buscar el refreshToken en la base de datos
+        const storedToken = await RefreshToken.findOne({ where: { token: refreshToken } });
+        if (!storedToken) {
+            return res.status(403).json({ message: 'Refresh token inválido o revocado' });
         }
 
-        // Generar un nuevo access token
-        const newAccessToken = jwt.sign(
-            { username: userData.username },
-            process.env.JWT_SECRET,
-            { expiresIn: '15m' }
-        );
+        // Verificar el refreshToken con jwt
+        jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, userData) => {
+            if (err) {
+                return res.status(403).json({ message: 'Token expirado o inválido' });
+            }
 
-        res.status(200).json({
-            accessToken: newAccessToken
+            // Generar un nuevo access token
+            const newAccessToken = jwt.sign(
+                { username: userData.username },
+                process.env.JWT_SECRET,
+                { expiresIn: '15m' }
+            );
+
+            res.status(200).json({
+                accessToken: newAccessToken
+            });
         });
-    });
+    } catch (error) {
+        console.error('Error al procesar refresh token:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
 });
 
 // LOGOUT (opcional)
-router.delete('/logout', (req, res) => {
-    // El cliente envía el refreshToken
+router.delete('/logout', async (req, res) => {
     const { refreshToken } = req.body;
     if (!refreshToken) {
         return res.status(400).json({ message: 'No se envió el refreshToken' });
     }
 
-    // Eliminar el refreshToken del array
-    refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
-
-    res.status(200).json({ message: 'Se cerró la sesión (refresh token eliminado)' });
+    try {
+        // Eliminar el refresh token de la base de datos
+        const deletedCount = await RefreshToken.destroy({ where: { token: refreshToken } });
+        if (deletedCount === 0) {
+            return res.status(404).json({ message: 'Refresh token no encontrado' });
+        }
+        res.status(200).json({ message: 'Se cerró la sesión (refresh token eliminado)' });
+    } catch (error) {
+        console.error('Error al eliminar el refresh token:', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
+    }
 });
+
 
 module.exports = router;
