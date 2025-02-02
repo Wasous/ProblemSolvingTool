@@ -15,7 +15,8 @@ const startServer = async () => {
         await connectDB();
 
         // Sincronizar todos los modelos
-        await sequelize.sync();
+        //await sequelize.sync({ force: true });
+        await sequelize.sync({ alter: true });
         console.log('Base de datos sincronizada.');
 
         // Middlewares

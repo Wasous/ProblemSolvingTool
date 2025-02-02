@@ -1,44 +1,57 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext.jsx';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // Accedemos a la función login desde el contexto
+  const { login } = useAuth(); // Función del contexto para actualizar el estado de autenticación
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Simulación de validación básica (puedes agregar lógica real aquí)
-    if (email === 'hschilet@gmail.com' && password === '1234') {
-      login(); // Cambia el estado de autenticación a true
-      navigate('/main'); // Redirige al dashboard principal
-    } else {
-      alert('Credenciales incorrectas. Inténtalo de nuevo.');
+    try {
+      // El backend espera { email, password } 
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await axios.post(
+        `${API_URL}/auth/login`,
+        { email, password }
+      );
+
+      // Se obtienen los tokens del backend
+      const { accessToken, refreshToken } = response.data;
+
+      // Guarda los tokens en localStorage (o en otro lugar según tu estrategia)
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+
+      // Actualiza el estado de autenticación (por ejemplo, en el contexto)
+      login();
+
+      // Redirige al usuario al dashboard principal
+      navigate('/main');
+    } catch (error) {
+      console.error('Error en el login:', error);
+      console.error('Error en el login:', error.response || error);
+      alert('Credenciales incorrectas o error en el servidor.');
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <Header title="Solvit"/>
+      <Header title="Solvit" />
 
       {/* Contenedor del Formulario */}
       <div className="flex-grow flex items-center justify-center bg-gray-50 py-6 sm:py-12">
-        {/* Ajusta max-w con breakpoints para tener un formulario responsive */}
         <div className="relative p-3 w-full mx-auto max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl">
-          {/* Fondo degradado (position absolute con skew) */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
-
-          {/* Caja blanca del formulario */}
           <div className="relative bg-white shadow-lg rounded-lg p-8 w-full">
-            <h1 className="text-2xl font-semibold text-center mb-6">
-              Iniciar Sesión
-            </h1>
+            <h1 className="text-2xl font-semibold text-center mb-6">Iniciar Sesión</h1>
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Campo de Email */}
               <div className="relative">
