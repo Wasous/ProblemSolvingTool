@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const RefreshToken = require('../models/RefreshToken');
 
-// "BD" en memoria
-const users = [];
+
 // Almacena refresh tokens (en un proyecto real iría en DB)
 let refreshTokens = [];
 
@@ -66,12 +66,21 @@ router.post('/login', async (req, res) => {
             { expiresIn: '7d' }
         );
 
+        // Guardar el refresh token en la base de datos
+        await RefreshToken.create({
+            token: refreshToken,
+            userId: user.id, // Asegúrate de que el usuario tenga un id
+            deviceInfo: req.headers['user-agent'], // Opcional, para identificar el dispositivo
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días a partir de ahora
+        });
+
         res.status(200).json({ message: 'Inicio de sesión exitoso', accessToken, refreshToken });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
+
 
 
 // REFRESH
