@@ -1,7 +1,13 @@
+
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('./index');
+const sequelize = require('./db'); // Importamos la instancia
 
 const User = sequelize.define('User', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+    },
     username: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -19,8 +25,9 @@ const User = sequelize.define('User', {
     },
     phoneNumber: {
         type: DataTypes.STRING,
-        allowNull: true, // Permitimos que sea nulo, ya que es opcional
+        allowNull: true,
     },
 });
 
 module.exports = User;
+

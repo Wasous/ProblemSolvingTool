@@ -1,31 +1,26 @@
-const { Sequelize } = require('sequelize');
-require('dotenv').config();
+// models/index.js
+const sequelize = require('./db');
 
-// Convertir el puerto a número, ya que por defecto viene como string desde el .env
-const port = parseInt(process.env.DB_PORT, 10);
+// Importamos los modelos
+const User = require('./user');
+const Project = require('./Project');
+const Team = require('./Team');
+const DmaicStage = require('./DmaicStage');
 
-// Verificar si se requiere conexión SSL
-const sslEnabled = process.env.DB_SSL === 'true';
+// Definimos las asociaciones
+User.hasMany(Project, { foreignKey: 'owner_id', as: 'projects' });
+Project.belongsTo(User, { foreignKey: 'owner_id', as: 'owner' });
 
-const sequelize = new Sequelize(
-    process.env.DB_NAME,    // Nombre de la base de datos
-    process.env.DB_USER,    // Usuario
-    process.env.DB_PASSWORD, // Contraseña
-    {
-        host: process.env.DB_HOST,  // Dirección del servidor
-        port,                       // Puerto de la base de datos
-        dialect: 'postgres',        // Base de datos que estás usando
-        logging: false,             // Desactivar logs de SQL
-        dialectOptions: sslEnabled ? {
-            ssl: {
-                require: true,
-                // Si tu certificado es auto firmado o necesitas aceptar certificados no verificados
-                rejectUnauthorized: false,
-            }
-        } : {}
-    }
-);
+Project.hasMany(Team, { foreignKey: 'project_id', as: 'teamMembers' });
+Team.belongsTo(Project, { foreignKey: 'project_id' });
 
+User.hasMany(Team, { foreignKey: 'user_id', as: 'userTeams' });
+Team.belongsTo(User, { foreignKey: 'user_id' });
+
+Project.hasMany(DmaicStage, { foreignKey: 'project_id', as: 'dmaicStages' });
+DmaicStage.belongsTo(Project, { foreignKey: 'project_id' });
+
+// Conexión a la base de datos
 const connectDB = async () => {
     try {
         await sequelize.authenticate();
@@ -35,4 +30,12 @@ const connectDB = async () => {
     }
 };
 
-module.exports = { sequelize, connectDB };
+// Exportamos
+module.exports = {
+    sequelize,
+    connectDB,
+    User,
+    Project,
+    Team,
+    DmaicStage,
+};

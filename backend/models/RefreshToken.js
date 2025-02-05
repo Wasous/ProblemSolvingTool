@@ -1,6 +1,6 @@
 // models/RefreshToken.js
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('./index');
+const sequelize = require('./db');
 
 const RefreshToken = sequelize.define('RefreshToken', {
     token: {
