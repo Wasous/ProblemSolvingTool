@@ -7,9 +7,8 @@ const { connectDB, sequelize } = require('./models');
 
 // Rutas de Autenticación
 const authRoutes = require('./routes/auth');
-
-// Rutas de Proyectos (contiene /api/projects, /dmaic, etc.)
 const projectRoutes = require('./routes/projectRoutes');
+const userRoutes = require('./routes/user');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -29,6 +28,7 @@ const startServer = async () => {
 
         // Rutas de proyectos (incluye creación de proyectos, DMAIC, etc.)
         app.use('/api/projects', projectRoutes);
+        app.use('/api/users', userRoutes);
 
         // Ruta de prueba
         app.get('/', (req, res) => {

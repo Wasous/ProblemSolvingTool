@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const CreateForm = () => {
-    // Hooks deben estar dentro del componente
     const [projectName, setProjectName] = useState('');
     const [description, setDescription] = useState('');
     const [methodology, setMethodology] = useState('DMAIC');
@@ -10,18 +9,144 @@ const CreateForm = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [priority, setPriority] = useState('Medium');
+
+    // Estados para seleccionar al líder del proyecto
+    const [owner, setOwner] = useState(null);
+    const [ownerSearchTerm, setOwnerSearchTerm] = useState('');
+    const [ownerSearchResults, setOwnerSearchResults] = useState([]);
+
+    // Estados para miembros del equipo (como antes)
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [teamMembers, setTeamMembers] = useState([]);
+
     const navigate = useNavigate();
 
-    const handleCreateProject = () => {
-        console.log({ projectName, description, methodology, stakeholders, startDate, endDate, priority });
-        navigate('/DMAIC')
+    // Supongamos que el usuario actual está almacenado en localStorage
+    useEffect(() => {
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            // Por defecto, el líder es el usuario actual.
+            setOwner(parsedUser);
+            setOwnerSearchTerm(parsedUser.username);
+        }
+    }, []);
+
+    // Función de búsqueda para el líder (deberías reemplazarla por una llamada a tu API real)
+    const handleOwnerSearch = async () => {
+        const dummyUsers = [
+            { id: 'user-1', username: 'Juan' },
+            { id: 'user-2', username: 'María' },
+            { id: 'user-3', username: 'Pedro' },
+        ];
+        setOwnerSearchResults(
+            dummyUsers.filter((u) =>
+                u.username.toLowerCase().includes(ownerSearchTerm.toLowerCase())
+            )
+        );
+    };
+
+    useEffect(() => {
+        if (ownerSearchTerm.trim() !== '') {
+            handleOwnerSearch();
+        } else {
+            setOwnerSearchResults([]);
+        }
+    }, [ownerSearchTerm]);
+
+    // Función de búsqueda para miembros del equipo (igual que antes)
+    const handleTeamSearch = async () => {
+        const dummyUsers = [
+            { id: 'user-1', username: 'Juan' },
+            { id: 'user-2', username: 'María' },
+            { id: 'user-3', username: 'Pedro' },
+        ];
+        setSearchResults(
+            dummyUsers.filter((u) =>
+                u.username.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        );
+    };
+
+    useEffect(() => {
+        if (searchTerm.trim() !== '') {
+            handleTeamSearch();
+        } else {
+            setSearchResults([]);
+        }
+    }, [searchTerm]);
+
+    const handleAddTeamMember = (user) => {
+        if (!teamMembers.find((member) => member.id === user.id)) {
+            setTeamMembers([...teamMembers, user]);
+        }
+    };
+
+    const handleCreateProject = async () => {
+        // Preparamos el payload, incluyendo owner_id. Si no se eligió otro, se usa el owner por defecto.
+        const payload = {
+            name: projectName,
+            description,
+            methodology,
+            stakeholders,
+            start_date: startDate,
+            end_date: endDate,
+            priority,
+            owner_id: owner ? owner.id : null,
+        };
+
+        try {
+            // Crear el proyecto en el backend
+            const res = await fetch('/api/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                console.error('Error creando el proyecto');
+                return;
+            }
+
+            const data = await res.json();
+            const projectId = data.projectId;
+
+            // Asociar cada miembro del equipo al proyecto
+            for (const member of teamMembers) {
+                await fetch(`/api/projects/${projectId}/team`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify({
+                        userIdToAdd: member.id,
+                        role: 'Member'
+                    })
+                });
+            }
+
+            navigate('/DMAIC'); // Redirige a la siguiente etapa
+        } catch (error) {
+            console.error('Error al crear el proyecto y asociar miembros:', error);
+        }
     };
 
     return (
         <main className="container mx-auto p-4 flex-grow">
             <div className="bg-white rounded-lg shadow-md p-6">
                 <h2 className="text-xl font-semibold mb-4">Create a New Project</h2>
-                <form className="space-y-4">
+                <form
+                    className="space-y-4"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleCreateProject();
+                    }}
+                >
                     {/* Project Name */}
                     <div>
                         <label htmlFor="projectName" className="block text-sm font-medium text-gray-700">
@@ -118,25 +243,104 @@ const CreateForm = () => {
                             <option value="Low">Low</option>
                         </select>
                     </div>
+                    {/* Project Leader Section */}
+                    <div>
+                        <label htmlFor="ownerSearch" className="block text-sm font-medium text-gray-700">
+                            Project Leader
+                        </label>
+                        <input
+                            type="text"
+                            id="ownerSearch"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            placeholder="Search for a leader..."
+                            value={ownerSearchTerm}
+                            onChange={(e) => setOwnerSearchTerm(e.target.value)}
+                        />
+                        {ownerSearchResults.length > 0 && (
+                            <ul className="mt-2 border rounded-md p-2">
+                                {ownerSearchResults.map((user) => (
+                                    <li key={user.id} className="flex justify-between items-center">
+                                        <span>{user.username}</span>
+                                        <button
+                                            type="button"
+                                            className="bg-green-500 text-white px-2 py-1 rounded"
+                                            onClick={() => {
+                                                setOwner(user);
+                                                setOwnerSearchTerm(user.username);
+                                                setOwnerSearchResults([]);
+                                            }}
+                                        >
+                                            Select
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        {owner && (
+                            <p className="mt-2 text-sm">
+                                Selected Leader: <strong>{owner.username}</strong>
+                            </p>
+                        )}
+                    </div>
+                    {/* Team Members Section */}
+                    <div>
+                        <label htmlFor="teamSearch" className="block text-sm font-medium text-gray-700">
+                            Add Team Members
+                        </label>
+                        <input
+                            type="text"
+                            id="teamSearch"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            placeholder="Search users by name or email..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        {searchResults.length > 0 && (
+                            <ul className="mt-2 border rounded-md p-2">
+                                {searchResults.map((user) => (
+                                    <li key={user.id} className="flex justify-between items-center">
+                                        <span>{user.username}</span>
+                                        <button
+                                            type="button"
+                                            className="bg-green-500 text-white px-2 py-1 rounded"
+                                            onClick={() => handleAddTeamMember(user)}
+                                        >
+                                            +
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                        {teamMembers.length > 0 && (
+                            <div className="mt-2">
+                                <h4 className="text-sm font-medium">Selected Team Members:</h4>
+                                <ul className="mt-1">
+                                    {teamMembers.map((member) => (
+                                        <li key={member.id}>{member.username}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                    <div className="mt-6 flex justify-end space-x-4">
+                        <button
+                            type="button"
+                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md shadow hover:bg-gray-400"
+                            onClick={() => console.log('Cancelled')}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600"
+                        >
+                            Create Project
+                        </button>
+                    </div>
                 </form>
-                <div className="mt-6 flex justify-end space-x-4">
-                    <button
-                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md shadow hover:bg-gray-400"
-                        onClick={() => console.log('Cancelled')}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600"
-                        onClick={handleCreateProject}
-                    >
-                        Create Project
-                    </button>
-                </div>
             </div>
         </main>
     );
 };
 
 export default CreateForm;
-

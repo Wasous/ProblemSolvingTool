@@ -6,6 +6,7 @@ const User = require('./user');
 const Project = require('./Project');
 const Team = require('./Team');
 const DmaicStage = require('./DmaicStage');
+const RefreshToken = require('./RefreshToken')
 
 // Definimos las asociaciones
 User.hasMany(Project, { foreignKey: 'owner_id', as: 'projects' });
@@ -19,6 +20,9 @@ Team.belongsTo(User, { foreignKey: 'user_id' });
 
 Project.hasMany(DmaicStage, { foreignKey: 'project_id', as: 'dmaicStages' });
 DmaicStage.belongsTo(Project, { foreignKey: 'project_id' });
+
+User.hasMany(RefreshToken, { foreignKey: 'userId' });
+RefreshToken.belongsTo(User, { foreignKey: 'userId' });
 
 // Conexión a la base de datos
 const connectDB = async () => {
@@ -38,4 +42,5 @@ module.exports = {
     Project,
     Team,
     DmaicStage,
+    RefreshToken
 };

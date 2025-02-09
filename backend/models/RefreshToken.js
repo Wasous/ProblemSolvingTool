@@ -3,16 +3,25 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('./db');
 
 const RefreshToken = sequelize.define('RefreshToken', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+    },
     token: {
         type: DataTypes.STRING,
         allowNull: false,
     },
     userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID, // <--- CAMBIAR A UUID
         allowNull: false,
+        references: {
+            model: 'Users', // Nombre de la tabla real
+            key: 'id',
+        }
     },
     deviceInfo: {
-        type: DataTypes.STRING, // Opcional: para almacenar detalles del dispositivo
+        type: DataTypes.STRING,
         allowNull: true,
     },
     expiresAt: {
