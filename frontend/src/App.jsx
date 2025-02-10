@@ -7,7 +7,7 @@ import MainPage from './pages/MainPage';
 import ProjectsPage from './pages/ProjectsPage';
 import CreateProject from './pages/CreatePage';
 import DMAIC from './pages/DMAIC';
-import { AuthProvider } from './contexts/AuthContext.jsx';
+import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {

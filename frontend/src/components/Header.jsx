@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import PropTypes from 'prop-types';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.jsx';
+import { useAuth } from '../contexts/AuthContext';
 import React from 'react';
 import DmaicMenu from './DmaicMenu.jsx'
 
@@ -9,7 +9,6 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
-  console.log('Current location:', location);
 
   // Manejar cambio de stage
   const handleStageClick = (stage) => {
