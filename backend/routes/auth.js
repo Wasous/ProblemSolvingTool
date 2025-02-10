@@ -42,7 +42,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-
 // LOGIN
 router.post('/login', async (req, res) => {
     try {
@@ -67,18 +66,21 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
 
+        // Generar el access token (vigencia corta)
         const accessToken = jwt.sign(
-            { email: user.email },
+            { email: user.email, userId: user.id },
             process.env.JWT_SECRET,
             { expiresIn: '15m' }
         );
 
+        // Generar el refresh token (vigencia larga)
         const refreshToken = jwt.sign(
-            { email: user.email },
+            { email: user.email, userId: user.id },
             process.env.JWT_REFRESH_SECRET,
             { expiresIn: '7d' }
         );
 
+        // Guardar el refresh token en la base de datos (opcional)
         await RefreshToken.create({
             token: refreshToken,
             userId: user.id,
@@ -86,7 +88,15 @@ router.post('/login', async (req, res) => {
             expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         });
 
-        res.status(200).json({ message: 'Inicio de sesión exitoso', accessToken, refreshToken });
+        // Enviar el refresh token en una cookie HTTP-Only
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true, // No accesible desde JS
+            secure: process.env.NODE_ENV === 'production', // Solo en HTTPS en producción
+            sameSite: 'Strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+        });
+
+        res.status(200).json({ message: 'Inicio de sesión exitoso', accessToken });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error interno del servidor' });
@@ -96,13 +106,14 @@ router.post('/login', async (req, res) => {
 
 // REFRESH
 router.post('/refresh', async (req, res) => {
-    const { refreshToken } = req.body;
+    // Leer el refresh token desde la cookie
+    const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-        return res.status(400).json({ message: 'No se envió el refreshToken' });
+        return res.status(403).json({ message: 'No se encontró refresh token, inicia sesión nuevamente' });
     }
 
     try {
-        // Buscar el refresh token en la base de datos
+        // Buscar el refresh token en la base de datos (opcional, si lo estás guardando)
         const storedToken = await RefreshToken.findOne({ where: { token: refreshToken } });
         if (!storedToken) {
             return res.status(403).json({ message: 'Refresh token inválido o revocado' });
@@ -116,7 +127,7 @@ router.post('/refresh', async (req, res) => {
 
             // Generar un nuevo access token
             const newAccessToken = jwt.sign(
-                { username: userData.username },
+                { email: userData.email, userId: userData.userId },
                 process.env.JWT_SECRET,
                 { expiresIn: '15m' }
             );
@@ -129,11 +140,13 @@ router.post('/refresh', async (req, res) => {
     }
 });
 
-// LOGOUT (opcional)
+
+// LOGOUT
 router.delete('/logout', async (req, res) => {
-    const { refreshToken } = req.body;
+    // Leer el refresh token desde la cookie
+    const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-        return res.status(400).json({ message: 'No se envió el refreshToken' });
+        return res.status(400).json({ message: 'No se encontró el refresh token' });
     }
 
     try {
@@ -142,11 +155,15 @@ router.delete('/logout', async (req, res) => {
         if (deletedCount === 0) {
             return res.status(404).json({ message: 'Refresh token no encontrado' });
         }
+        // Limpiar la cookie
+        res.clearCookie('refreshToken');
+
         res.status(200).json({ message: 'Se cerró la sesión (refresh token eliminado)' });
     } catch (error) {
         console.error('Error al eliminar el refresh token:', error);
         res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
+
 
 module.exports = router;

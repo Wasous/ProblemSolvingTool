@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const CreateForm = () => {
     const [projectName, setProjectName] = useState('');
@@ -35,16 +36,17 @@ const CreateForm = () => {
 
     // Función de búsqueda para el líder (deberías reemplazarla por una llamada a tu API real)
     const handleOwnerSearch = async () => {
-        const dummyUsers = [
-            { id: 'user-1', username: 'Juan' },
-            { id: 'user-2', username: 'María' },
-            { id: 'user-3', username: 'Pedro' },
-        ];
-        setOwnerSearchResults(
-            dummyUsers.filter((u) =>
-                u.username.toLowerCase().includes(ownerSearchTerm.toLowerCase())
-            )
-        );
+        if (!ownerSearchTerm.trim()) {
+            setOwnerSearchResults([]);
+            return;
+        }
+    
+        try {
+            const response = await axios.get(`http://localhost:5000/api/users/search?term=${ownerSearchTerm}&limit=10`);
+            setOwnerSearchResults(response.data.users); // Ajusta según la estructura de la respuesta
+        } catch (error) {
+            console.error("Error buscando líder:", error);
+        }
     };
 
     useEffect(() => {
@@ -54,21 +56,25 @@ const CreateForm = () => {
             setOwnerSearchResults([]);
         }
     }, [ownerSearchTerm]);
+    
 
     // Función de búsqueda para miembros del equipo (igual que antes)
     const handleTeamSearch = async () => {
-        const dummyUsers = [
-            { id: 'user-1', username: 'Juan' },
-            { id: 'user-2', username: 'María' },
-            { id: 'user-3', username: 'Pedro' },
-        ];
-        setSearchResults(
-            dummyUsers.filter((u) =>
-                u.username.toLowerCase().includes(searchTerm.toLowerCase())
-            )
-        );
+        if (!searchTerm.trim()) {
+            setSearchResults([]);
+            return;
+        }
+    
+        try {
+            const response = await axios.get(`http://localhost:5000/api/users/search?term=${searchTerm}`);
+            console.log(response)
+            setSearchResults(response.data.users); // Ajusta según la estructura de la respuesta
+        } catch (error) {
+            console.error("Error buscando miembros:", error);
+            setSearchResults([]); // Evita que los resultados anteriores persistan en caso de error
+        }
     };
-
+    
     useEffect(() => {
         if (searchTerm.trim() !== '') {
             handleTeamSearch();
@@ -78,8 +84,8 @@ const CreateForm = () => {
     }, [searchTerm]);
 
     const handleAddTeamMember = (user) => {
-        if (!teamMembers.find((member) => member.id === user.id)) {
-            setTeamMembers([...teamMembers, user]);
+        if (!teamMembers.some((member) => member.id === user.id)) {
+            setTeamMembers((prevMembers) => [...prevMembers, user]);
         }
     };
 

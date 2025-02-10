@@ -1,41 +1,35 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage'; // Placeholder para futuras páginas
-import "./styles/globals.css";
+import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
-import MainPage from './pages/MainPage'
-import ProjectsPage from './pages/ProjectsPage'
+import MainPage from './pages/MainPage';
+import ProjectsPage from './pages/ProjectsPage';
 import CreateProject from './pages/CreatePage';
 import DMAIC from './pages/DMAIC';
 import { AuthProvider } from './contexts/AuthContext.jsx';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Ruta para la página principal */}
+          {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
-
-          {/* Ruta para la página de login */}
           <Route path="/login" element={<LoginPage />} />
-
-          {/* Ruta para la página de registro */}
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* Ruta para la página principal */}
-          <Route path="/main" element={<MainPage />} />
+          {/* Protected Routes - Only accessible if logged in */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/main" element={<MainPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/newProject" element={<CreateProject />} />
+            <Route path="/DMAIC" element={<DMAIC />} />
+          </Route>
 
-          {/* Ruta para la página de projectos */}
-          <Route path="/projects" element={<ProjectsPage />} />
-
-          {/* Ruta para la página de creación de projectos */}
-          <Route path="/newProject" element={<CreateProject />} />
-
-          {/* Ruta para la página de creación de projectos */}
-          <Route path="/DMAIC" element={<DMAIC />} />
-
+          {/* Redirect any unknown route to / */}
+          <Route path="*" element={<LandingPage />} />
         </Routes>
       </Router>
     </AuthProvider>

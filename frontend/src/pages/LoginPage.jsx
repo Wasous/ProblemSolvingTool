@@ -4,6 +4,7 @@ import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { login as apiLogin } from '../services/authService';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,33 +14,21 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
-      // El backend espera { email, password } 
-      const API_URL = import.meta.env.VITE_API_URL;
-      const response = await axios.post(
-        `${API_URL}/auth/login`,
-        { email, password }
-      );
+      const { accessToken } = await apiLogin(email, password);
 
-      // Se obtienen los tokens del backend
-      const { accessToken, refreshToken } = response.data;
-
-      // Guarda los tokens en localStorage (o en otro lugar según tu estrategia)
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-
-      // Actualiza el estado de autenticación (por ejemplo, en el contexto)
-      login();
-
-      // Redirige al usuario al dashboard principal
+      // Guardamos el access token en el estado global o en memoria
+      login(accessToken); // 💡 Login lo guarda en el contexto.
+  
+      // Redirige al usuario al dashboard
       navigate('/main');
     } catch (error) {
-      console.error('Error en el login:', error);
       console.error('Error en el login:', error.response || error);
       alert('Credenciales incorrectas o error en el servidor.');
     }
   };
+  
 
   return (
     <div className="min-h-screen flex flex-col">

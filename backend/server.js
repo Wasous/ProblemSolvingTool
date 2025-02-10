@@ -1,6 +1,8 @@
 // server.js
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
+
 require('dotenv').config();
 
 const { connectDB, sequelize } = require('./models');
@@ -19,8 +21,12 @@ const startServer = async () => {
         await sequelize.sync({ alter: true });
         //await sequelize.sync({ force: true });
         console.log('Base de datos sincronizada.');
-
-        app.use(cors());
+        
+        app.use(cookieParser());
+        app.use(cors({
+            origin: process.env.CLIENT_URL || 'http://localhost:5173', // Cambia por la URL de tu frontend
+            credentials: true
+        }));
         app.use(express.json());
 
         // Rutas de autenticación
@@ -30,6 +36,7 @@ const startServer = async () => {
         app.use('/api/projects', projectRoutes);
         app.use('/api/users', userRoutes);
 
+        
         // Ruta de prueba
         app.get('/', (req, res) => {
             res.send('Backend funcionando correctamente :)');
