@@ -12,7 +12,10 @@ const CreateForm = () => {
     const [priority, setPriority] = useState('Medium');
 
     // Estados para seleccionar al líder del proyecto
-    const [owner, setOwner] = useState(null);
+    const [owner, setOwner] = useState(() => {
+        const storedUser = localStorage.getItem('currentUser');
+        return storedUser ? JSON.parse(storedUser) : null; // Evita JSON.parse(null)
+    });
     const [ownerSearchTerm, setOwnerSearchTerm] = useState('');
     const [ownerSearchResults, setOwnerSearchResults] = useState([]);
 
@@ -20,29 +23,23 @@ const CreateForm = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [teamMembers, setTeamMembers] = useState([]);
+    const token = localStorage.getItem("accessToken");
 
     const navigate = useNavigate();
 
-    // Supongamos que el usuario actual está almacenado en localStorage
-    useEffect(() => {
-        const storedUser = localStorage.getItem('currentUser');
-        if (storedUser) {
-            const parsedUser = JSON.parse(storedUser);
-            // Por defecto, el líder es el usuario actual.
-            setOwner(parsedUser);
-            setOwnerSearchTerm(parsedUser.username);
-        }
-    }, []);
 
-    // Función de búsqueda para el líder (deberías reemplazarla por una llamada a tu API real)
     const handleOwnerSearch = async () => {
         if (!ownerSearchTerm.trim()) {
             setOwnerSearchResults([]);
             return;
         }
-    
+
         try {
-            const response = await axios.get(`http://localhost:5000/api/users/search?term=${ownerSearchTerm}&limit=10`);
+            const response = await axios.get(`http://localhost:5000/api/users/search?term=${ownerSearchTerm}&limit=10`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setOwnerSearchResults(response.data.users); // Ajusta según la estructura de la respuesta
         } catch (error) {
             console.error("Error buscando líder:", error);
@@ -56,7 +53,7 @@ const CreateForm = () => {
             setOwnerSearchResults([]);
         }
     }, [ownerSearchTerm]);
-    
+
 
     // Función de búsqueda para miembros del equipo (igual que antes)
     const handleTeamSearch = async () => {
@@ -64,18 +61,22 @@ const CreateForm = () => {
             setSearchResults([]);
             return;
         }
-    
+
         try {
-            const response = await axios.get(`http://localhost:5000/api/users/search?term=${searchTerm}`);
-            console.log(response)
+            const response = await axios.get(`http://localhost:5000/api/users/search?term=${searchTerm}&limit=10`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setSearchResults(response.data.users); // Ajusta según la estructura de la respuesta
         } catch (error) {
             console.error("Error buscando miembros:", error);
             setSearchResults([]); // Evita que los resultados anteriores persistan en caso de error
         }
     };
-    
+
     useEffect(() => {
+
         if (searchTerm.trim() !== '') {
             handleTeamSearch();
         } else {
@@ -267,6 +268,7 @@ const CreateForm = () => {
                                 {ownerSearchResults.map((user) => (
                                     <li key={user.id} className="flex justify-between items-center">
                                         <span>{user.username}</span>
+
                                         <button
                                             type="button"
                                             className="bg-green-500 text-white px-2 py-1 rounded"

@@ -14,13 +14,13 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
-      const { accessToken } = await apiLogin(email, password);
+      const { accessToken, userId, userName } = await apiLogin(email, password);
 
       // Guardamos el access token en el estado global o en memoria
-      login(accessToken); // 💡 Login lo guarda en el contexto.
-  
+      login(accessToken, userId, userName); // 💡 Login lo guarda en el contexto.
+
       // Redirige al usuario al dashboard
       navigate('/main');
     } catch (error) {
@@ -28,7 +28,7 @@ const LoginPage = () => {
       alert('Credenciales incorrectas o error en el servidor.');
     }
   };
-  
+
 
   return (
     <div className="min-h-screen flex flex-col">
