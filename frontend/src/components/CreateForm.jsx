@@ -107,7 +107,7 @@ const CreateForm = () => {
 
     try {
         // Crear el proyecto usando axios
-        const res = await axios.post('/api/projects', payload, {
+        const res = await axios.post('http://localhost:5000/api/projects', payload, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
@@ -119,7 +119,7 @@ const CreateForm = () => {
 
         // Asociar cada miembro del equipo al proyecto con axios
         for (const member of teamMembers) {
-            await axios.post(`/api/projects/${projectId}/team`, {
+            await axios.post(`http://localhost:5000/api/projects/${projectId}/team`, {
                 userIdToAdd: member.id,
                 role: 'Member'
             }, {
