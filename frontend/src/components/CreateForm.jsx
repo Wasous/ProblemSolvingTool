@@ -3,16 +3,28 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const CreateForm = () => {
-  // Form fields
+  // Helper para formatear la fecha en YYYY-MM-DD
+  const formatDate = (date) => date.toISOString().split('T')[0];
+  const today = new Date();
+  const defaultStartDate = formatDate(today);
+  const oneMonthLater = new Date(today);
+  oneMonthLater.setMonth(today.getMonth() + 1);
+  const defaultEndDate = formatDate(oneMonthLater);
+
+  // Campos del formulario básico
   const [projectName, setProjectName] = useState('');
   const [description, setDescription] = useState('');
   const [methodology, setMethodology] = useState('DMAIC');
-  const [stakeholders, setStakeholders] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState(defaultStartDate);
+  const [endDate, setEndDate] = useState(defaultEndDate);
   const [priority, setPriority] = useState('Medium');
 
-  // States for leader selection
+  // Nuevo: Los tags se manejarán por su modelo independiente
+  const [availableTags, setAvailableTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [newTag, setNewTag] = useState('');
+
+  // Estados para la selección del líder
   const [owner, setOwner] = useState(() => {
     const storedUser = localStorage.getItem('currentUser');
     return storedUser ? JSON.parse(storedUser) : null;
@@ -20,7 +32,7 @@ const CreateForm = () => {
   const [ownerSearchTerm, setOwnerSearchTerm] = useState('');
   const [ownerSearchResults, setOwnerSearchResults] = useState([]);
 
-  // States for team members
+  // Estados para miembros del equipo
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);
@@ -28,7 +40,22 @@ const CreateForm = () => {
   const token = localStorage.getItem("accessToken");
   const navigate = useNavigate();
 
-  // Owner search function (using axios)
+  // Cargar etiquetas disponibles
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/tags', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setAvailableTags(res.data.tags || []);
+      } catch (error) {
+        console.error("Error fetching tags:", error);
+      }
+    };
+    fetchTags();
+  }, [token]);
+
+  // Función de búsqueda para líder
   const handleOwnerSearch = useCallback(async () => {
     if (!ownerSearchTerm.trim()) {
       setOwnerSearchResults([]);
@@ -53,7 +80,7 @@ const CreateForm = () => {
     }
   }, [ownerSearchTerm, handleOwnerSearch]);
 
-  // Team members search function
+  // Función de búsqueda para miembros del equipo
   const handleTeamSearch = async () => {
     if (!searchTerm.trim()) {
       setSearchResults([]);
@@ -79,63 +106,87 @@ const CreateForm = () => {
     }
   }, [searchTerm]);
 
-  // Add team member on click (if not already added)
+  // Añadir miembro del equipo al hacer click en el nombre
   const handleAddTeamMember = (user) => {
     if (!teamMembers.some(member => member.id === user.id)) {
       setTeamMembers(prevMembers => [...prevMembers, user]);
     }
   };
 
-  // Remove team member
+  // Eliminar miembro del equipo
   const handleRemoveTeamMember = (userId) => {
     setTeamMembers(prevMembers => prevMembers.filter(member => member.id !== userId));
   };
 
-  // Create Project: First create project, then associate team members
+  // Manejo de selección de etiquetas: al hacer click en una etiqueta disponible se añade o elimina de las seleccionadas
+  const toggleTagSelection = (tag) => {
+    if (selectedTags.some(t => t.id === tag.id)) {
+      setSelectedTags(selectedTags.filter(t => t.id !== tag.id));
+    } else {
+      setSelectedTags([...selectedTags, tag]);
+    }
+  };
+
+  // Crear una nueva etiqueta y agregarla a las listas de availableTags y selectedTags
+  const handleCreateTag = async () => {
+    if (!newTag.trim()) return;
+    try {
+      const res = await axios.post('http://localhost:5000/api/tags', { name: newTag }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const createdTag = res.data.tag; // Suponemos que el endpoint devuelve { tag: { id, name } }
+      setAvailableTags([...availableTags, createdTag]);
+      setSelectedTags([...selectedTags, createdTag]);
+      setNewTag('');
+    } catch (error) {
+      console.error("Error creating new tag:", error);
+    }
+  };
+
+  // Crear Proyecto: Se crea el proyecto y luego se asocian los miembros del equipo.
+  // Se envían también los tags seleccionados como array de IDs.
   const handleCreateProject = async () => {
-    // Preparamos el payload con la información del proyecto
     const payload = {
-        name: projectName,
-        description,
-        methodology,
-        stakeholders,
-        start_date: startDate,
-        end_date: endDate,
-        priority,
-        owner_id: owner ? owner.id : null,
+      name: projectName,
+      description,
+      methodology,
+      stakeholders,
+      start_date: startDate,
+      end_date: endDate,
+      priority,
+      status: "Not Started",  // Valor predeterminado
+      owner_id: owner ? owner.id : null,
+      tags: selectedTags.map(tag => tag.id)  // Enviar array de IDs de tags
     };
 
     try {
-        // Crear el proyecto usando axios
-        const res = await axios.post('http://localhost:5000/api/projects', payload, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-            }
-        });
-
-        // Suponemos que la respuesta contiene el projectId
-        const { projectId } = res.data;
-
-        // Asociar cada miembro del equipo al proyecto con axios
-        for (const member of teamMembers) {
-            await axios.post(`http://localhost:5000/api/projects/${projectId}/team`, {
-                userIdToAdd: member.id,
-                role: 'Member'
-            }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-                }
-            });
+      const res = await axios.post('http://localhost:5000/api/projects', payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
+      });
 
-        navigate('/DMAIC'); // Redirige a la siguiente etapa
+      const { projectId } = res.data;
+
+      // Asociar cada miembro del equipo al proyecto
+      for (const member of teamMembers) {
+        await axios.post(`http://localhost:5000/api/projects/${projectId}/team`, {
+          userIdToAdd: member.id,
+          role: 'Member'
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      }
+
+      navigate('/DMAIC'); // Redirige a la siguiente etapa del proceso
     } catch (error) {
-        console.error('Error al crear el proyecto y asociar miembros:', error);
+      console.error('Error al crear el proyecto y asociar miembros:', error);
     }
-};
-
+  };
 
   return (
     <main className="container mx-auto p-4 flex-grow">
@@ -148,7 +199,7 @@ const CreateForm = () => {
             handleCreateProject();
           }}
         >
-          {/* LEFT COLUMN: Form fields and search inputs */}
+          {/* LEFT COLUMN: Campos del formulario y búsquedas */}
           <div className="space-y-4">
             {/* Project Name */}
             <div>
@@ -189,19 +240,6 @@ const CreateForm = () => {
                 <option value="DMAIC">DMAIC</option>
                 <option value="8D">8D</option>
               </select>
-            </div>
-            {/* Stakeholders */}
-            <div>
-              <label htmlFor="stakeholders" className="block text-sm font-medium text-gray-700">
-                Stakeholders
-              </label>
-              <input
-                type="text"
-                id="stakeholders"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                value={stakeholders}
-                onChange={(e) => setStakeholders(e.target.value)}
-              />
             </div>
             {/* Start and End Date */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -245,6 +283,53 @@ const CreateForm = () => {
                 <option value="Medium">Medium</option>
                 <option value="Low">Low</option>
               </select>
+            </div>
+            {/* Tags Section */}
+            <div>
+              <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+                Tags
+              </label>
+              <div className="flex flex-wrap space-x-2">
+                {availableTags.map(tag => (
+                  <button
+                    type="button"
+                    key={tag.id}
+                    className={`px-2 py-1 rounded-full border ${selectedTags.some(t => t.id === tag.id) ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'}`}
+                    onClick={() => toggleTagSelection(tag)}
+                  >
+                    {tag.name}
+                  </button>
+                ))}
+                {/* Input para crear nueva etiqueta */}
+                <div className="flex items-center">
+                  <input
+                    type="text"
+                    placeholder="New tag"
+                    className="px-2 py-1 border rounded"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="ml-2 px-2 py-1 bg-green-500 text-white rounded"
+                    onClick={handleCreateTag}
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+              {selectedTags.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600">Selected Tags:</p>
+                  <div className="flex flex-wrap space-x-2 mt-1">
+                    {selectedTags.map(tag => (
+                      <span key={tag.id} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             {/* Leader Search */}
             <div>

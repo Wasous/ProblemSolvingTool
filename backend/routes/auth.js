@@ -155,20 +155,21 @@ router.delete('/logout', async (req, res) => {
     }
 
     try {
-        // Eliminar el refresh token de la base de datos
+        // Intentar eliminar el refresh token de la base de datos
         const deletedCount = await RefreshToken.destroy({ where: { token: refreshToken } });
         if (deletedCount === 0) {
-            return res.status(404).json({ message: 'Refresh token no encontrado' });
+            // Si no se encuentra, registramos un warning, pero seguimos como si se hubiera cerrado la sesión
+            console.warn('Refresh token no encontrado en la base de datos');
         }
         // Limpiar la cookie
         res.clearCookie('refreshToken');
-
-        res.status(200).json({ message: 'Se cerró la sesión (refresh token eliminado)' });
+        return res.status(200).json({ message: 'Se cerró la sesión (refresh token eliminado o no encontrado)' });
     } catch (error) {
         console.error('Error al eliminar el refresh token:', error);
-        res.status(500).json({ message: 'Error interno del servidor' });
+        return res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
+
 
 
 module.exports = router;

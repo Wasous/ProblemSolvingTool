@@ -6,7 +6,7 @@ const User = require('./user'); // para la FK owner_id
 const Project = sequelize.define('Project', {
     id: {
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4, // Genera un UUID v4 automático
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
     },
     name: {
@@ -20,14 +20,14 @@ const Project = sequelize.define('Project', {
     methodology: {
         type: DataTypes.ENUM('DMAIC'),
         allowNull: false,
-        defaultValue: 'DMAIC', // Ajusta si quieres '8D' por defecto
+        defaultValue: 'DMAIC',
     },
     owner_id: {
         type: DataTypes.UUID,
         allowNull: false,
     },
     start_date: {
-        type: DataTypes.DATEONLY, // Sólo fecha (sin hora)
+        type: DataTypes.DATEONLY,
         allowNull: true,
     },
     end_date: {
@@ -39,8 +39,32 @@ const Project = sequelize.define('Project', {
         allowNull: false,
         defaultValue: 'Medium',
     },
+    status: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    problemStatement: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    rootCause: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    kpis: {
+        type: DataTypes.JSONB, // Permite almacenar múltiples KPIs
+        allowNull: true,
+    },
+    budget: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+    },
+    category: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    // Podrías agregar otros campos según lo requieras...
 });
 
-// Definimos la relación con el modelo User, asumiendo que User también tiene un UUID como PK.
-
 module.exports = Project;
+

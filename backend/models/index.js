@@ -6,7 +6,8 @@ const User = require('./user');
 const Project = require('./Project');
 const Team = require('./Team');
 const DmaicStage = require('./DmaicStage');
-const RefreshToken = require('./RefreshToken')
+const RefreshToken = require('./RefreshToken');
+const Tag = require('./Tag');
 
 // Definimos las asociaciones
 User.hasMany(Project, { foreignKey: 'owner_id', as: 'projects' });
@@ -23,6 +24,9 @@ DmaicStage.belongsTo(Project, { foreignKey: 'project_id' });
 
 User.hasMany(RefreshToken, { foreignKey: 'userId' });
 RefreshToken.belongsTo(User, { foreignKey: 'userId' });
+
+Project.belongsToMany(Tag, { through: 'ProjectTags', as: 'tags' });
+Tag.belongsToMany(Project, { through: 'ProjectTags', as: 'projects' });
 
 // Conexión a la base de datos
 const connectDB = async () => {
