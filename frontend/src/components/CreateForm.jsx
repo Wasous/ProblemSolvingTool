@@ -150,7 +150,6 @@ const CreateForm = () => {
       name: projectName,
       description,
       methodology,
-      stakeholders,
       start_date: startDate,
       end_date: endDate,
       priority,
@@ -189,248 +188,260 @@ const CreateForm = () => {
   };
 
   return (
-    <main className="container mx-auto p-4 flex-grow">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Create a New Project</h2>
-        <form
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleCreateProject();
-          }}
-        >
-          {/* LEFT COLUMN: Campos del formulario y búsquedas */}
-          <div className="space-y-4">
-            {/* Project Name */}
-            <div>
-              <label htmlFor="projectName" className="block text-sm font-medium text-gray-700">
-                Project Name
-              </label>
-              <input
-                type="text"
-                id="projectName"
-                className="peer placeholder-transparent h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-600"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-              />
+    <main className="container mx-auto p-4 max-w-5xl">
+      <div className="bg-white rounded-lg shadow-lg p-8">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Create New Project</h2>
+
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          handleCreateProject();
+        }} className="space-y-8">
+          {/* Basic Info Section */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Basic Information</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Project Name
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder="Enter project name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Methodology
+                </label>
+                <div className="flex gap-4">
+                  {['DMAIC', '8D'].map((method) => (
+                    <button
+                      key={method}
+                      type="button"
+                      className={`flex-1 py-2 rounded-lg border transition ${methodology === method
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                      onClick={() => setMethodology(method)}
+                    >
+                      {method}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            {/* Description */}
+
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
               <textarea
-                id="description"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                rows="4"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-              ></textarea>
+                placeholder="Describe your project"
+              />
             </div>
-            {/* Methodology */}
-            <div>
-              <label htmlFor="methodology" className="block text-sm font-medium text-gray-700">
-                Select Methodology
-              </label>
-              <select
-                id="methodology"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                value={methodology}
-                onChange={(e) => setMethodology(e.target.value)}
-              >
-                <option value="DMAIC">DMAIC</option>
-                <option value="8D">8D</option>
-              </select>
-            </div>
-            {/* Start and End Date */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Start Date
                 </label>
                 <input
                   type="date"
-                  id="startDate"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
               </div>
+
               <div>
-                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   End Date
                 </label>
                 <input
                   type="date"
-                  id="endDate"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Priority
+                </label>
+                <div className="flex gap-2">
+                  {['Low', 'Medium', 'High'].map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      className={`flex-1 py-2 px-3 rounded-lg border transition ${priority === p
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                      onClick={() => setPriority(p)}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            {/* Priority */}
-            <div>
-              <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
-                Priority
-              </label>
-              <select
-                id="priority"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-              >
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-              </select>
+          </div>
+
+          {/* Team Section */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Team Members</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Leader Selection */}
+              <div className="space-y-4">
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Project Leader
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Search for a leader..."
+                    value={ownerSearchTerm}
+                    onChange={(e) => setOwnerSearchTerm(e.target.value)}
+                  />
+
+                  {ownerSearchResults.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border">
+                      {ownerSearchResults.map((user) => (
+                        <button
+                          key={user.id}
+                          type="button"
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 transition"
+                          onClick={() => {
+                            setOwner(user);
+                            setOwnerSearchTerm(user.username);
+                            setOwnerSearchResults([]);
+                          }}
+                        >
+                          {user.username}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {owner && (
+                  <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                    <span className="text-sm text-blue-700">Selected: {owner.username}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Team Members Selection */}
+              <div className="space-y-4">
+                <div className="relative">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Team Members
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Search for team members..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+
+                  {searchResults.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border">
+                      {searchResults.map((user) => (
+                        <button
+                          key={user.id}
+                          type="button"
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 transition"
+                          onClick={() => {
+                            handleAddTeamMember(user);
+                            setSearchTerm('');
+                            setSearchResults([]);
+                          }}
+                        >
+                          {user.username}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  {teamMembers.map((member) => (
+                    <div key={member.id}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-700">{member.username}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveTeamMember(member.id)}
+                        className="text-gray-400 hover:text-red-500 transition px-2"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-            {/* Tags Section */}
-            <div>
-              <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
-                Tags
-              </label>
-              <div className="flex flex-wrap space-x-2">
+          </div>
+
+          {/* Tags Section */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-700 border-b pb-2">Tags</h3>
+
+            <div className="space-y-4">
+              <div className="flex flex-wrap gap-2">
                 {availableTags.map(tag => (
                   <button
                     type="button"
                     key={tag.id}
-                    className={`px-2 py-1 rounded-full border ${selectedTags.some(t => t.id === tag.id) ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'}`}
                     onClick={() => toggleTagSelection(tag)}
+                    className={`px-3 py-1 rounded-full border transition ${selectedTags.some(t => t.id === tag.id)
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
                   >
                     {tag.name}
                   </button>
                 ))}
-                {/* Input para crear nueva etiqueta */}
-                <div className="flex items-center">
-                  <input
-                    type="text"
-                    placeholder="New tag"
-                    className="px-2 py-1 border rounded"
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="ml-2 px-2 py-1 bg-green-500 text-white rounded"
-                    onClick={handleCreateTag}
-                  >
-                    Add
-                  </button>
-                </div>
               </div>
-              {selectedTags.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">Selected Tags:</p>
-                  <div className="flex flex-wrap space-x-2 mt-1">
-                    {selectedTags.map(tag => (
-                      <span key={tag.id} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* Leader Search */}
-            <div>
-              <label htmlFor="ownerSearch" className="block text-sm font-medium text-gray-700">
-                Project Leader
-              </label>
-              <input
-                type="text"
-                id="ownerSearch"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                placeholder="Search for a leader..."
-                value={ownerSearchTerm}
-                onChange={(e) => setOwnerSearchTerm(e.target.value)}
-              />
-              {ownerSearchResults.length > 0 && (
-                <ul className="mt-2 border rounded-md p-2">
-                  {ownerSearchResults.map((user) => (
-                    <li
-                      key={user.id}
-                      className="cursor-pointer hover:bg-gray-100 p-1"
-                      onClick={() => {
-                        setOwner(user);
-                        setOwnerSearchTerm(user.username);
-                        setOwnerSearchResults([]);
-                      }}
-                    >
-                      {user.username}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {owner && (
-                <p className="mt-2 text-sm">
-                  Selected Leader: <strong>{owner.username}</strong>
-                </p>
-              )}
-            </div>
-            {/* Team Members Search */}
-            <div>
-              <label htmlFor="teamSearch" className="block text-sm font-medium text-gray-700">
-                Add Team Members
-              </label>
-              <input
-                type="text"
-                id="teamSearch"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                placeholder="Search users by name or email..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              {searchResults.length > 0 && (
-                <ul className="mt-2 border rounded-md p-2">
-                  {searchResults.map((user) => (
-                    <li
-                      key={user.id}
-                      className="cursor-pointer hover:bg-gray-100 p-1"
-                      onClick={() => {
-                        handleAddTeamMember(user);
-                        setSearchTerm('');
-                        setSearchResults([]);
-                      }}
-                    >
-                      {user.username}
-                    </li>
-                  ))}
-                </ul>
-              )}
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Add new tag"
+                  className="flex-1 px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={handleCreateTag}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                >
+                  Add Tag
+                </button>
+              </div>
             </div>
           </div>
-          {/* RIGHT COLUMN: Team Preview */}
-          <div className="space-y-4">
-            <div className="border rounded-lg p-4 shadow-md bg-slate-300 border-slate-400">
-              <h3 className="text-lg font-semibold mb-2">Team Preview</h3>
-              {owner && (
-                <div className="mb-4 p-2 border-b">
-                  <span className="font-medium">Leader:</span> {owner.username}
-                </div>
-              )}
-              {teamMembers.length > 0 ? (
-                <ul className="space-y-2">
-                  {teamMembers.map((member) => (
-                    <li key={member.id} className="flex justify-between items-center bg-gray-100 p-2 rounded">
-                      <span>{member.username}</span>
-                      <button
-                        type="button"
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => handleRemoveTeamMember(member.id)}
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No team members selected.</p>
-              )}
-            </div>
-          </div>
+
           {/* Submit Button */}
-          <div className="md:col-span-2 flex justify-end">
-            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600">
+          <div className="pt-6 border-t">
+            <button
+              type="submit"
+              className="w-full md:w-auto px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+            >
               Create Project
             </button>
           </div>

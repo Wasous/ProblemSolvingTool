@@ -36,7 +36,7 @@ const startServer = async () => {
         // Rutas de proyectos (incluye creación de proyectos, DMAIC, etc.)
         app.use('/api/projects', projectRoutes);
         app.use('/api/users', userRoutes);
-        app.use('/api/tag', tagRoutes);
+        app.use('/api/tags', tagRoutes);
 
         // Ruta de prueba
         app.get('/', (req, res) => {
