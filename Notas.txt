@@ -1,0 +1,7 @@
+No esta funcionando la asignación de tags a proyectos. La tabla está vacía.
+Mejorar visual de la lista de proyectos. Incluir un desplegable que muestre información extra como el equipo, descripción etc. Claude mucho mejor en temas de diseño que chat gpt.
+El botón de Open en la lista de proyectos debería abrir el DMAIC page para ese proyecto en la fase en la que está.
+Pensar como eliminar proyectos.
+Filtros para la página de lista de proyectos.
+Crear cabecera o menú en la página DMAIC para modificar y añadir detalles (edit menu) y cosas que afecten a todo el proyecto. Resúmenes, notas, etc.
+Revisar Header de DMAIC para que no ocupe tanto el menu de navegación DMAIC.
