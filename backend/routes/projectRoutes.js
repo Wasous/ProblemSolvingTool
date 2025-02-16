@@ -86,6 +86,7 @@ router.post('/', authenticateToken, async (req, res) => {
 router.get('/', authenticateToken, async (req, res) => {
     try {
         const { userId: userId } = req.user;
+        console.log(userId)
         if (!userId) {
             return res.status(400).json({ message: 'No se puede determinar el user_id del token.' });
         }
