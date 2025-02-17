@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { Project, Team, DmaicStage, User } = require('../models');
+const { Project, Team, DmaicStage, User, Tag } = require('../models');
+
 
 // =============================================================
 // Middleware para verificar token y extraer user_id
@@ -36,12 +37,13 @@ router.post('/', authenticateToken, async (req, res) => {
             return res.status(400).json({ message: 'No se puede determinar el user_id del token.' });
         }
 
-        const { name, description, methodology, start_date, end_date, priority } = req.body;
+        // Extraemos los campos del body, incluyendo "tags"
+        const { name, description, methodology, start_date, end_date, priority, tags } = req.body;
 
         if (!name || !methodology) {
             return res.status(400).json({ message: 'Falta nombre o metodología' });
         }
-        console.log(name)
+
         // Crear el proyecto
         const newProject = await Project.create({
             name,
@@ -70,6 +72,12 @@ router.post('/', authenticateToken, async (req, res) => {
             role: 'Owner',
         });
 
+        // Si se incluyen etiquetas en el payload, asociarlas al proyecto
+        if (tags && Array.isArray(tags) && tags.length > 0) {
+            // Se asume que "tags" es un array de IDs de etiquetas
+            await newProject.setTags(tags);
+        }
+
         return res.status(201).json({
             message: 'Proyecto creado exitosamente',
             projectId: newProject.id
@@ -96,7 +104,10 @@ router.get('/', authenticateToken, async (req, res) => {
             include: [
                 {
                     model: Project,
-                    include: [{ model: DmaicStage, as: 'dmaicStages' }],
+                    include: [
+                        { model: DmaicStage, as: 'dmaicStages' },
+                        { model: Tag, as: 'tags' }
+                    ],
                 },
             ],
         });
@@ -230,6 +241,10 @@ router.get('/:id', authenticateToken, async (req, res) => {
                 {
                     model: DmaicStage,
                     as: 'dmaicStages',
+                },
+                {
+                    model: Tag,
+                    as: 'tags',
                 },
             ],
         });

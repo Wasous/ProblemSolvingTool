@@ -70,7 +70,7 @@ router.post('/login', async (req, res) => {
         const accessToken = jwt.sign(
             { email: user.email, userId: user.id },
             process.env.JWT_SECRET,
-            { expiresIn: '15m' }
+            { expiresIn: '1h' }
         );
 
         // Generar el refresh token (vigencia larga)
@@ -134,7 +134,7 @@ router.post('/refresh', async (req, res) => {
             const newAccessToken = jwt.sign(
                 { email: userData.email, userId: userData.userId },
                 process.env.JWT_SECRET,
-                { expiresIn: '15m' }
+                { expiresIn: '1h' }
             );
 
             res.status(200).json({ accessToken: newAccessToken });

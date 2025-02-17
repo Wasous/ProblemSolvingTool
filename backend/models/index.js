@@ -13,20 +13,23 @@ const Tag = require('./Tag');
 User.hasMany(Project, { foreignKey: 'owner_id', as: 'projects' });
 Project.belongsTo(User, { foreignKey: 'owner_id', as: 'owner' });
 
-Project.hasMany(Team, { foreignKey: 'project_id', as: 'teamMembers' });
-Team.belongsTo(Project, { foreignKey: 'project_id' });
+// Para Project y Team (uno a muchos)
+Project.hasMany(Team, { foreignKey: 'project_id', as: 'teamMembers', onDelete: 'CASCADE' });
+Team.belongsTo(Project, { foreignKey: 'project_id', onDelete: 'CASCADE' });
 
 User.hasMany(Team, { foreignKey: 'user_id', as: 'userTeams' });
 Team.belongsTo(User, { foreignKey: 'user_id' });
 
-Project.hasMany(DmaicStage, { foreignKey: 'project_id', as: 'dmaicStages' });
-DmaicStage.belongsTo(Project, { foreignKey: 'project_id' });
+// Para Project y DmaicStage (uno a muchos)
+Project.hasMany(DmaicStage, { foreignKey: 'project_id', as: 'dmaicStages', onDelete: 'CASCADE' });
+DmaicStage.belongsTo(Project, { foreignKey: 'project_id', onDelete: 'CASCADE' });
 
 User.hasMany(RefreshToken, { foreignKey: 'userId' });
 RefreshToken.belongsTo(User, { foreignKey: 'userId' });
 
-Project.belongsToMany(Tag, { through: 'ProjectTags', as: 'tags' });
-Tag.belongsToMany(Project, { through: 'ProjectTags', as: 'projects' });
+// Para Project y Tag (relación many-to-many)
+Project.belongsToMany(Tag, { through: 'ProjectTags', as: 'tags', onDelete: 'CASCADE' });
+Tag.belongsToMany(Project, { through: 'ProjectTags', as: 'projects', onDelete: 'CASCADE' });
 
 // Conexión a la base de datos
 const connectDB = async () => {
