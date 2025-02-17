@@ -170,6 +170,9 @@ const CreateForm = () => {
 
       // Asociar cada miembro del equipo al proyecto
       for (const member of teamMembers) {
+        // Si el miembro es el owner, saltar (ya se agregó como Owner)
+        if (owner && member.id === owner.id) continue;
+
         await axios.post(`http://localhost:5000/api/projects/${projectId}/team`, {
           userIdToAdd: member.id,
           role: 'Member'
@@ -224,8 +227,8 @@ const CreateForm = () => {
                       key={method}
                       type="button"
                       className={`flex-1 py-2 rounded-lg border transition ${methodology === method
-                          ? 'bg-blue-500 text-white border-blue-500'
-                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                         }`}
                       onClick={() => setMethodology(method)}
                     >
@@ -284,8 +287,8 @@ const CreateForm = () => {
                       key={p}
                       type="button"
                       className={`flex-1 py-2 px-3 rounded-lg border transition ${priority === p
-                          ? 'bg-blue-500 text-white border-blue-500'
-                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        ? 'bg-blue-500 text-white border-blue-500'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                         }`}
                       onClick={() => setPriority(p)}
                     >
@@ -408,8 +411,8 @@ const CreateForm = () => {
                     key={tag.id}
                     onClick={() => toggleTagSelection(tag)}
                     className={`px-3 py-1 rounded-full border transition ${selectedTags.some(t => t.id === tag.id)
-                        ? 'bg-blue-500 text-white border-blue-500'
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      ? 'bg-blue-500 text-white border-blue-500'
+                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
                       }`}
                   >
                     {tag.name}

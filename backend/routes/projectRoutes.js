@@ -105,6 +105,7 @@ router.get('/', authenticateToken, async (req, res) => {
                 {
                     model: Project,
                     include: [
+                        { model: User, as: 'owner' },
                         { model: DmaicStage, as: 'dmaicStages' },
                         { model: Tag, as: 'tags' }
                     ],

@@ -49,5 +49,6 @@ module.exports = {
     Project,
     Team,
     DmaicStage,
-    RefreshToken
+    RefreshToken,
+    Tag
 };
