@@ -1,53 +1,51 @@
 import PropTypes from 'prop-types';
-import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 
 const DmaicMenu = ({ stages, currentStage, setCurrentStage }) => {
-    // Manejar cambio de stage
     const handleStageClick = (stage) => {
         if (stage.started) {
             setCurrentStage(stage.name);
         }
     };
 
+    const getStageStyles = (stage) => {
+        if (stage.completed || (stage.started && currentStage === stage.name)) {
+            return 'bg-purple-500 text-white hover:bg-purple-600';
+        }
+        if (stage.started) {
+            return 'bg-purple-400 text-white hover:bg-purple-500';
+        }
+        return 'bg-slate-700 text-gray-400';
+    };
+
     return (
-        <nav
-            className="flex bg-gray-50 text-gray-700 border border-gray-200 py-3 px-5 rounded-lg dark:bg-gray-800 dark:border-gray-700"
-            aria-label="Breadcrumb"
-        >
-            <ol className="inline-flex items-center space-x-1 md:space-x-3">
+        <div className="flex items-center gap-2 px-2">
+            <div className="flex items-center gap-1">
                 {stages.map((stage, index) => (
-                    <li
+                    <button
                         key={stage.name}
-                        className={`inline-flex items-center ${index > 0 ? 'before:content-["/"] before:mx-2 before:text-gray-400' : ''
-                            }`}
+                        onClick={() => handleStageClick(stage)}
+                        disabled={!stage.started}
+                        className={`
+                            flex items-center gap-2 px-3 py-1.5 rounded-md
+                            transition-all duration-200 text-sm
+                            ${getStageStyles(stage)}
+                            ${stage.started ? 'cursor-pointer' : 'cursor-default'}
+                        `}
                     >
-                        {stage.completed ? (
-                            <button
-                                onClick={() => handleStageClick(stage)}
-                                className={`text-sm font-medium ${currentStage === stage.name
-                                    ? 'bg-blue-200'
-                                    : 'text-blue-600 hover:text-blue-800'
-                                    }`}
-                            >
-                                {stage.name}
-                            </button>
-                        ) : stage.started ? (
-                            <button
-                                onClick={() => handleStageClick(stage)}
-                                className={`text-sm font-medium ${currentStage === stage.name
-                                    ? 'bg-green-100'
-                                    : 'text-sm text-greenText hover:text-greenTextHover font-medium'}`}
-                            >
-                                {stage.name}
-                            </button>
-                        ) : (
-                            <span className="text-sm text-gray-400">{stage.name}</span>
-                        )}
-                    </li>
+                        <span className="w-4 h-4 flex items-center justify-center">
+                            {stage.completed ? (
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                </svg>
+                            ) : (
+                                <span className="text-sm">{index + 1}</span>
+                            )}
+                        </span>
+                        <span className="font-medium">{stage.name}</span>
+                    </button>
                 ))}
-            </ol>
-        </nav>
+            </div>
+        </div>
     );
 };
 
@@ -59,6 +57,8 @@ DmaicMenu.propTypes = {
             completed: PropTypes.bool.isRequired,
         })
     ).isRequired,
+    currentStage: PropTypes.string.isRequired,
+    setCurrentStage: PropTypes.func.isRequired,
 };
 
 export default DmaicMenu;

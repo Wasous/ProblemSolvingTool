@@ -1,21 +1,50 @@
-import { useState } from 'react'
-import PropTypes from 'prop-types';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import React from 'react';
-import DmaicMenu from './DmaicMenu.jsx'
+
+// Menu icons as components
+const MenuIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <line x1="4" y1="12" x2="20" y2="12"></line>
+    <line x1="4" y1="6" x2="20" y2="6"></line>
+    <line x1="4" y1="18" x2="20" y2="18"></line>
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    width="24" 
+    height="24" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+  >
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
+);
+
+import DmaicMenu from './DmaicMenu.jsx';
 
 const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
-
-  // Manejar cambio de stage
-  const handleStageClick = (stage) => {
-    if (stage.started) {
-      setCurrentStage(stage.name);
-    }
-  };
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleHeaderClick = () => {
     navigate(isAuthenticated ? '/main' : '/');
@@ -24,71 +53,175 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
   const handleLogoutClick = () => {
     logout();
     navigate('/');
+    setIsMenuOpen(false);
   };
 
-  return (
-    <header className="bg-accentBg text-white p-4 shadow-md fixed top-0 left-0 w-full z-50">
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Título clicable */}
-        <div className="flex items-center space-x-4">
-          {/* Título fijo */}
-          <h1
-            className="text-2xl font-bold cursor-pointer"
-            onClick={handleHeaderClick}>
-            {title}
-          </h1>
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
-
-
-          {/* Botón condicional basado en isAuthenticated */}
-          {location.pathname !== '/DMAIC' && location.pathname !== '/newProject' && isAuthenticated && (
-            <button
-              className="bg-white text-blue-600 px-3 py-1 rounded-lg flex items-center shadow hover:bg-gray-100 hover:shadow-md transition duration-200"
-              onClick={() => navigate('/newProject')}
-              aria-label="Crear un nuevo proyecto"
+  const NavLinks = ({ className = "", onClick = () => {} }) => (
+    <ul className={`${className}`}>
+      {isAuthenticated ? (
+        <>
+          <li>
+            <Link 
+              to="/main" 
+              className="block py-2 text-gray-300 hover:text-white transition-colors"
+              onClick={onClick}
             >
-              <span className="text-lg font-bold">+</span>
-              <span className="ml-2 text-sm">Nuevo Proyecto</span>
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link 
+              to="/projects" 
+              className="block py-2 hover:text-gray-200 transition-colors"
+              onClick={onClick}
+            >
+              Projects
+            </Link>
+          </li>
+          <li>
+            <Link 
+              to="/settings" 
+              className="block py-2 hover:text-gray-200 transition-colors"
+              onClick={onClick}
+            >
+              Settings
+            </Link>
+          </li>
+          <li>
+            <button
+              onClick={() => {
+                handleLogoutClick();
+                onClick();
+              }}
+              className="block w-full text-left py-2 text-rose-400 hover:text-rose-300 transition-colors"
+            >
+              Logout
             </button>
+          </li>
+        </>
+      ) : (
+        <>
+          <li>
+            <Link 
+              to="/login" 
+              className="block py-2 hover:text-gray-200 transition-colors"
+              onClick={onClick}
+            >
+              Login
+            </Link>
+          </li>
+          <li>
+            <Link 
+              to="/register" 
+              className="block py-2 hover:text-gray-200 transition-colors"
+              onClick={onClick}
+            >
+              Register
+            </Link>
+          </li>
+        </>
+      )}
+    </ul>
+  );
+
+  return (
+    <header className="bg-slate-800 text-gray-100 shadow-lg fixed top-0 left-0 w-full z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo and Title */}
+          <div className="flex items-center space-x-4">
+            <h1
+              className="text-xl lg:text-2xl font-bold cursor-pointer truncate max-w-[200px] lg:max-w-none hover:text-white transition-colors"
+              onClick={handleHeaderClick}
+            >
+              {title}
+            </h1>
+
+            {/* New Project Button - Hidden on mobile */}
+            {location.pathname !== '/DMAIC' && 
+             location.pathname !== '/newProject' && 
+             isAuthenticated && (
+              <button
+                className="hidden lg:flex bg-indigo-600 text-white px-4 py-2 rounded-lg items-center shadow-md hover:bg-indigo-700 transition duration-200"
+                onClick={() => navigate('/newProject')}
+                aria-label="Create new project"
+              >
+                <span className="text-lg font-bold">+</span>
+                <span className="ml-2 text-sm">Nuevo Proyecto</span>
+              </button>
+            )}
+          </div>
+
+          {/* DMAIC Menu */}
+          {location.pathname === '/DMAIC' && (
+            <div className="hidden lg:block">
+              <DmaicMenu
+                stages={dmaicStages}
+                currentStage={currentStage}
+                setCurrentStage={setCurrentStage}
+              />
+            </div>
           )}
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:block">
+            <NavLinks className="flex space-x-6 items-center" />
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden p-2 hover:bg-slate-700 bg-slate-500 rounded-lg transition-colors"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
+          >
+            {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
+          </button>
         </div>
-        {/* Menú DMAIC solo en la página /DMAIC */}
-        {location.pathname === '/DMAIC' &&
-          <DmaicMenu
-            stages={dmaicStages}
-            currentStage={currentStage}
-            setCurrentStage={setCurrentStage} />}
-        {/* Navegación Condicional */}
-        <nav>
-          {isAuthenticated ? (
-            <ul className="flex space-x-4 items-center">
-              <li><Link to="/main" className="text-white hover:text-white hover:underline">Home</Link></li>
-              <li><Link to="/projects" className="text-white hover:text-white hover:underline">Projects</Link></li>
-              <li><Link to="/settings" className="text-white hover:text-white hover:underline">Settings</Link></li>
-              <li>
-                <button
-                  onClick={handleLogoutClick}
-                  className="text-red-400 hover:underline"
-                >
-                  Logout
-                </button>
-              </li>
-            </ul>
-          ) : (
-            <ul className="flex space-x-4 items-center">
-              <li><Link to="/login" className="text-white hover:text-white hover:underline">Login</Link></li>
-              <li><Link to="/register" className="text-white hover:text-white hover:underline">Register</Link></li>
-            </ul>
-          )}
-        </nav>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="lg:hidden py-4 border-t border-slate-700">
+            {/* Mobile New Project Button */}
+            {location.pathname !== '/DMAIC' && 
+             location.pathname !== '/newProject' && 
+             isAuthenticated && (
+              <button
+                className="w-full mb-4 bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center justify-center shadow-md hover:bg-indigo-700 transition duration-200"
+                onClick={() => {
+                  navigate('/newProject');
+                  setIsMenuOpen(false);
+                }}
+              >
+                <span className="text-lg font-bold">+</span>
+                <span className="ml-2">New Project</span>
+              </button>
+            )}
+
+            {/* Mobile DMAIC Menu */}
+            {location.pathname === '/DMAIC' && (
+              <div className="mb-4">
+                <DmaicMenu
+                  stages={dmaicStages}
+                  currentStage={currentStage}
+                  setCurrentStage={setCurrentStage}
+                />
+              </div>
+            )}
+
+            {/* Mobile Navigation Links */}
+            <NavLinks 
+              className="space-y-2" 
+              onClick={() => setIsMenuOpen(false)}
+            />
+          </div>
+        )}
       </div>
     </header>
   );
 };
 
-Header.propTypes = {
-  title: PropTypes.string.isRequired,
-};
-
 export default Header;
-
