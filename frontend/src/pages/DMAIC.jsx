@@ -1,38 +1,45 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import IsIsNotCard from '../components/IsIsNot';
 import FloatingButton from '../components/FloatingButton';
-import RichTextCard from '../components/RichTextCard';
-import SipocCard from '../components/Sipoc';
 import { useAuth } from '../contexts/AuthContext';
+
+// Import our new components
+import LeftPanel from '../components/LeftPanel';
+import RightPanel from '../components/RightPanel';
+import DmaicNavigation from '../components/DmaicNavigation';
+import ContentArea from '../components/ContentArea';
 
 const DMAIC = () => {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { accessToken } = useAuth();
-  
-  // Estado para el proyecto
+
+  // Project state
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
 
-  // Estado del stage actual
+  // Panel states
+  const [leftPanelOpen, setLeftPanelOpen] = useState(false);
+  const [rightPanelOpen, setRightPanelOpen] = useState(true); // Right panel open by default
+
+  // Current DMAIC stage
   const [currentStage, setCurrentStage] = useState('Define');
-
-  // Stages DMAIC con sus estados (se actualizará con datos del proyecto)
   const [dmaicStages, setDmaicStages] = useState([]);
 
-  // Estados para las cards de cada fase
+  // Card states for each phase
   const [defineCards, setDefineCards] = useState([]);
   const [measureCards, setMeasureCards] = useState([]);
   const [analyzeCards, setAnalyzeCards] = useState([]);
   const [improveCards, setImproveCards] = useState([]);
   const [controlCards, setControlCards] = useState([]);
 
-  // Cargar datos del proyecto al montar el componente
+  // Load project data
   useEffect(() => {
     const fetchProjectData = async () => {
       if (!projectId) {
@@ -40,44 +47,48 @@ const DMAIC = () => {
         setLoading(false);
         return;
       }
-      
+
       try {
         setLoading(true);
         const response = await axios.get(`${import.meta.env.VITE_API_URL}/projects/${projectId}`, {
           headers: { 'Authorization': `Bearer ${accessToken}` },
           withCredentials: true,
         });
-        
+
         const projectData = response.data.project;
         setProject(projectData);
-        
-        // Mapear etapas DMAIC del proyecto
+
+        // Check if current user is owner
+        const userId = JSON.parse(localStorage.getItem('currentUser'))?.id;
+        setIsOwner(projectData.owner_id === userId);
+
+        // Map DMAIC stages
         if (projectData.dmaicStages && projectData.dmaicStages.length > 0) {
           const mappedStages = projectData.dmaicStages.map(stage => ({
             name: stage.stage_name,
-            started: true, // Todas las etapas están disponibles inicialmente
+            started: true,
             completed: stage.completed
           }));
-          
-          // Ordenar las etapas en el orden correcto
+
+          // Order stages correctly
           const orderedStages = ['Define', 'Measure', 'Analyze', 'Improve', 'Control']
-            .map(stageName => 
-              mappedStages.find(s => s.name === stageName) || 
+            .map(stageName =>
+              mappedStages.find(s => s.name === stageName) ||
               { name: stageName, started: false, completed: false }
             );
-            
+
           setDmaicStages(orderedStages);
-          
-          // Establecer el stage actual basado en la primera etapa no completada
+
+          // Set current stage based on first incomplete stage
           const firstIncompleteStage = orderedStages.find(stage => !stage.completed);
           if (firstIncompleteStage) {
             setCurrentStage(firstIncompleteStage.name);
           }
-          
-          // Cargar tarjetas para cada fase desde stage.data
+
+          // Load cards for each phase
           loadCardsFromStageData(projectData.dmaicStages);
         }
-        
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching project data:", error);
@@ -85,20 +96,19 @@ const DMAIC = () => {
         setLoading(false);
       }
     };
-    
+
     fetchProjectData();
   }, [projectId, accessToken]);
-  
-  // Función para cargar tarjetas desde los datos de cada etapa
+
+  // Load cards from stage data
   const loadCardsFromStageData = (stages) => {
-    // Para cada etapa, buscar sus datos y convertirlos en tarjetas
     stages.forEach(stage => {
       const stageData = stage.data || {};
       const cardsArray = stageData.cards || [];
-      
+
       switch (stage.stage_name) {
         case 'Define':
-          setDefineCards(cardsArray.length > 0 ? cardsArray : []); 
+          setDefineCards(cardsArray.length > 0 ? cardsArray : []);
           break;
         case 'Measure':
           setMeasureCards(cardsArray.length > 0 ? cardsArray : []);
@@ -118,12 +128,12 @@ const DMAIC = () => {
     });
   };
 
-  // Función para guardar los cambios en el servidor
+  // Save changes to server
   const saveStageData = async (stageName, cards) => {
     try {
       const stageData = { cards };
-      const completed = false; // Esto podría ser un parámetro adicional
-      
+      const completed = false;
+
       await axios.put(
         `${import.meta.env.VITE_API_URL}/projects/dmaic/${projectId}/${stageName}`,
         { data: stageData, completed },
@@ -132,17 +142,56 @@ const DMAIC = () => {
           withCredentials: true,
         }
       );
-      
+
       console.log(`${stageName} stage data saved successfully`);
     } catch (error) {
       console.error(`Error saving ${stageName} stage data:`, error);
-      // Podrías mostrar un toast o notificación aquí
     }
   };
 
-  // Función para añadir una nueva tarjeta
+  // Mark current phase as complete and move to next
+  const completeCurrentPhase = async () => {
+    try {
+      const currentStageIndex = dmaicStages.findIndex(stage => stage.name === currentStage);
+      const nextStage = dmaicStages[currentStageIndex + 1]?.name;
+
+      // Get current cards for this stage
+      const currentCards = getCardsForStage(currentStage);
+
+      // Save current stage as completed
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/projects/dmaic/${projectId}/${currentStage}`,
+        { data: { cards: currentCards }, completed: true },
+        {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+          withCredentials: true,
+        }
+      );
+
+      // Update local state
+      const updatedStages = dmaicStages.map(stage =>
+        stage.name === currentStage
+          ? { ...stage, completed: true }
+          : stage.name === nextStage
+            ? { ...stage, started: true }
+            : stage
+      );
+
+      setDmaicStages(updatedStages);
+
+      // Move to next stage if available
+      if (nextStage) {
+        setCurrentStage(nextStage);
+      }
+    } catch (error) {
+      console.error("Error completing phase:", error);
+      alert("Failed to complete phase. Please try again.");
+    }
+  };
+
+  // Add a new card
   const handleAddCard = (type) => {
-    const newId = Date.now(); // ID único
+    const newId = Date.now();
     let newCard;
 
     if (type === 'IS_IS_NOT') {
@@ -151,9 +200,10 @@ const DMAIC = () => {
         type: 'IS_IS_NOT',
         data: {
           title: "",
+          problemStatement: "",
           is: { what: "", where: "", when: "", who: "", howMuch: "" },
           isNot: { what: "", where: "", when: "", who: "", howMuch: "" },
-          editionMode: true, // Arranca en edición
+          editionMode: true,
         },
       };
     } else if (type === 'RICH_TEXT') {
@@ -163,7 +213,7 @@ const DMAIC = () => {
         data: {
           title: "",
           content: "<p>Texto nuevo</p>",
-          editionMode: true, // Arranca en edición
+          editionMode: true,
         },
       };
     } else if (type === 'SIPOC') {
@@ -182,15 +232,12 @@ const DMAIC = () => {
       };
     }
 
-    // Actualizar el array correspondiente al currentStage
     const updatedCards = getCardsForStage(currentStage).concat(newCard);
     updateCardsForStage(currentStage, updatedCards);
-    
-    // Guardar en el servidor
     saveStageData(currentStage, updatedCards);
   };
 
-  // Función para obtener las tarjetas de la etapa actual
+  // Get cards for current stage
   const getCardsForStage = (stageName) => {
     switch (stageName) {
       case 'Define': return defineCards;
@@ -201,8 +248,8 @@ const DMAIC = () => {
       default: return [];
     }
   };
-  
-  // Función para actualizar las tarjetas de una etapa
+
+  // Update cards for a specific stage
   const updateCardsForStage = (stageName, cards) => {
     switch (stageName) {
       case 'Define': setDefineCards(cards); break;
@@ -214,26 +261,36 @@ const DMAIC = () => {
     }
   };
 
-  // Función para eliminar una tarjeta
+  // Delete a card
   const handleDeleteCard = (id) => {
     const currentCards = getCardsForStage(currentStage);
     const updatedCards = currentCards.filter((card) => card.id !== id);
     updateCardsForStage(currentStage, updatedCards);
-    
-    // Guardar en el servidor
     saveStageData(currentStage, updatedCards);
   };
 
-  // Función para actualizar una tarjeta (al guardar cambios)
+  // Save card changes
   const handleSaveCard = (id, newData) => {
     const currentCards = getCardsForStage(currentStage);
-    const updatedCards = currentCards.map((card) => 
+    const updatedCards = currentCards.map((card) =>
       card.id === id ? { ...card, data: newData } : card
     );
     updateCardsForStage(currentStage, updatedCards);
-    
-    // Guardar en el servidor
     saveStageData(currentStage, updatedCards);
+  };
+
+  // Check if requirements are complete
+  const checkRequirementsComplete = () => {
+    const currentCards = getCardsForStage(currentStage);
+    // This is a simplified check - you might want more sophisticated validation
+    return currentCards.length >= 2;
+  };
+
+  // Get completion percentage
+  const getCompletionPercentage = () => {
+    if (!dmaicStages || dmaicStages.length === 0) return 0;
+    const completedStages = dmaicStages.filter(stage => stage.completed).length;
+    return Math.round((completedStages / dmaicStages.length) * 100);
   };
 
   if (loading) {
@@ -251,7 +308,7 @@ const DMAIC = () => {
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-md">
           <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-700 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => navigate('/projects')}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
@@ -263,67 +320,67 @@ const DMAIC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col pt-28">
-      <Header
-        title={project?.name || "DMAIC Process"}
+    <div className="min-h-screen bg-gray-100 flex flex-col">
+      {/* Main Header */}
+      <Header title={project?.name || "DMAIC Process"} />
+
+      {/* DMAIC Phase Navigation */}
+      <DmaicNavigation
+        stages={dmaicStages}
         currentStage={currentStage}
         setCurrentStage={setCurrentStage}
-        dmaicStages={dmaicStages} />
+        completionPercentage={getCompletionPercentage()}
+      />
 
-      {(() => {
-        const currentCards = getCardsForStage(currentStage);
-        
-        if (currentCards.length === 0) {
-          return (
-            <div className="container mx-auto p-8 text-center">
-              <p className="text-gray-600 mb-4">No items found for this stage. Use the + button to add content.</p>
-            </div>
-          );
-        }
-        
-        return (
-          <>
-            {/* Render de todas las cards del stage actual */}
-            {currentCards.map((card) => {
-              switch (card.type) {
-                case 'IS_IS_NOT':
-                  return (
-                    <IsIsNotCard
-                      key={card.id}
-                      data={card.data}
-                      onDelete={() => handleDeleteCard(card.id)}
-                      onSave={(newData) => handleSaveCard(card.id, newData)}
-                    />
-                  );
-                case 'RICH_TEXT':
-                  return (
-                    <RichTextCard
-                      key={card.id}
-                      initialValue={card.data}
-                      onDelete={() => handleDeleteCard(card.id)}
-                      onSave={(newContent) =>
-                        handleSaveCard(card.id, { ...card.data, content: newContent })
-                      }
-                    />
-                  );
-                case 'SIPOC':
-                  return (
-                    <SipocCard
-                      key={card.id}
-                      data={card.data}
-                      onDelete={() => handleDeleteCard(card.id)}
-                      onSave={(newData) => handleSaveCard(card.id, newData)}
-                    />
-                  );
-                default:
-                  return null;
-              }
-            })}
-          </>
-        );
-      })()}
-      
-      {/* Botón para añadir nuevas tarjetas */}
+      <div className="flex flex-grow relative">
+        {/* Left Panel - Project Info */}
+        <LeftPanel
+          isOpen={leftPanelOpen}
+          project={project}
+          isOwner={isOwner}
+          dmaicStages={dmaicStages}
+        />
+
+        {/* Left Panel Toggle Button */}
+        <button
+          className="fixed left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-r-md p-2 z-20"
+          onClick={() => setLeftPanelOpen(!leftPanelOpen)}
+          aria-label={leftPanelOpen ? "Close project info panel" : "Open project info panel"}
+        >
+          {leftPanelOpen ? <FaChevronLeft /> : <FaChevronRight />}
+        </button>
+
+        {/* Main Content Area */}
+        <ContentArea
+          currentStage={currentStage}
+          currentCards={getCardsForStage(currentStage)}
+          handleAddCard={handleAddCard}
+          handleDeleteCard={handleDeleteCard}
+          handleSaveCard={handleSaveCard}
+          leftPanelOpen={leftPanelOpen}
+          rightPanelOpen={rightPanelOpen}
+        />
+
+        {/* Right Panel - Phase Requirements */}
+        <RightPanel
+          isOpen={rightPanelOpen}
+          currentStage={currentStage}
+          handleAddCard={handleAddCard}
+          requirementsComplete={checkRequirementsComplete()}
+          completeCurrentPhase={completeCurrentPhase}
+        />
+
+        {/* Right Panel Toggle Button */}
+        <button
+          className="fixed right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-l-md p-2 z-20"
+          onClick={() => setRightPanelOpen(!rightPanelOpen)}
+          aria-label={rightPanelOpen ? "Close requirements panel" : "Open requirements panel"}
+        >
+          {rightPanelOpen ? <FaChevronRight /> : <FaChevronLeft />}
+        </button>
+      </div>
+
+      {/* Floating Action Button */}
       <FloatingButton
         addIsIsNot={() => handleAddCard('IS_IS_NOT')}
         addRichText={() => handleAddCard('RICH_TEXT')}
