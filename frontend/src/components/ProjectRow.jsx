@@ -61,7 +61,7 @@ const ProjectCard = ({ project, projectId, isOwner, teamMembers = [] }) => {
     const handleOpenProject = () => navigate(`/DMAIC/${projectId}`);
     const handleEditProject = () => navigate(`/edit-project/${projectId}`);
 
-    const owner = project.owner.username
+    const owner = project.owner?.username || 'Unknown Owner';
 
     const priorityColors = {
         High: 'text-red-600',
@@ -79,7 +79,7 @@ const ProjectCard = ({ project, projectId, isOwner, teamMembers = [] }) => {
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-gray-500">
                         <FaUser className="text-xs" />
-                        <span>{owner ? project.owner.username : 'Unknown Owner'}</span>
+                        <span>{owner}</span>
                     </div>
                     <p className={`text-sm font-medium mt-1 ${priorityColors[project.priority] || 'text-gray-600'}`}>
                         <FaFlag className="inline mr-1 text-xs" /> {project.priority || 'No Priority'}
@@ -176,6 +176,9 @@ ProjectCard.propTypes = {
                 completed: PropTypes.bool.isRequired,
             })
         ),
+        owner: PropTypes.shape({
+            username: PropTypes.string
+        })
     }).isRequired,
     projectId: PropTypes.string.isRequired,
     isOwner: PropTypes.bool,
@@ -183,10 +186,7 @@ ProjectCard.propTypes = {
         PropTypes.shape({
             name: PropTypes.string.isRequired,
         })
-    ),
-    owner: PropTypes.shape({
-        name: PropTypes.string.isRequired,
-    }),
+    )
 };
 
 export default ProjectCard;

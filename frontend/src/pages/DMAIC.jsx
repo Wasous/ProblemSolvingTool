@@ -1,70 +1,145 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import IsIsNotCard from '../components/IsIsNot';
 import FloatingButton from '../components/FloatingButton';
 import RichTextCard from '../components/RichTextCard';
 import SipocCard from '../components/Sipoc';
+import { useAuth } from '../contexts/AuthContext';
 
 const DMAIC = () => {
+  const { projectId } = useParams();
+  const navigate = useNavigate();
+  const { accessToken } = useAuth();
+  
+  // Estado para el proyecto
+  const [project, setProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   // Estado del stage actual
   const [currentStage, setCurrentStage] = useState('Define');
 
-  // Stages DMAIC con sus estados
-  const dmaicStages = [
-    { name: 'Define', started: true, completed: true },
-    { name: 'Measure', started: true, completed: true },
-    { name: 'Analyze', started: true, completed: false },
-    { name: 'Improve', started: false, completed: false },
-    { name: 'Control', started: false, completed: false },
-  ];
+  // Stages DMAIC con sus estados (se actualizará con datos del proyecto)
+  const [dmaicStages, setDmaicStages] = useState([]);
 
-  const [defineCards, setDefineCards] = useState([
-    {
-      id: 1,
-      type: 'IS_IS_NOT',
-      data: {
-        title: "IS / IS NOT 1",
-        is: {
-          what: "Falla técnica en el sistema",
-          where: "En el almacén principal",
-          when: "Durante los fines de semana",
-          who: "Operadores del turno nocturno",
-          howMuch: "Impacta en un 20% los costos",
-        },
-        isNot: {
-          what: "No es un problema de hardware",
-          where: "No ocurre en los almacenes secundarios",
-          when: "No ocurre durante días laborables",
-          who: "No afecta al equipo de administración",
-          howMuch: "No impacta las métricas de calidad",
-        },
-      },
-    },
-    {
-      id: 2,
-      type: 'RICH_TEXT',
-      data: { title: "", content: "<p>Texto inicial</p>" },
-    },
-    {
-      id: 3,
-      type: 'SIPOC',
-      data: {
-        title: "SIPOC Example",
-        suppliers: "Proveedores iniciales",
-        inputs: "Insumos requeridos",
-        process: "Proceso principal",
-        outputs: "Resultados esperados",
-        customers: "Clientes objetivo",
-        editionMode: true,
-      },
-    },
-  ]);
-
+  // Estados para las cards de cada fase
+  const [defineCards, setDefineCards] = useState([]);
   const [measureCards, setMeasureCards] = useState([]);
   const [analyzeCards, setAnalyzeCards] = useState([]);
   const [improveCards, setImproveCards] = useState([]);
   const [controlCards, setControlCards] = useState([]);
+
+  // Cargar datos del proyecto al montar el componente
+  useEffect(() => {
+    const fetchProjectData = async () => {
+      if (!projectId) {
+        setError('No project ID provided');
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/projects/${projectId}`, {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+          withCredentials: true,
+        });
+        
+        const projectData = response.data.project;
+        setProject(projectData);
+        
+        // Mapear etapas DMAIC del proyecto
+        if (projectData.dmaicStages && projectData.dmaicStages.length > 0) {
+          const mappedStages = projectData.dmaicStages.map(stage => ({
+            name: stage.stage_name,
+            started: true, // Todas las etapas están disponibles inicialmente
+            completed: stage.completed
+          }));
+          
+          // Ordenar las etapas en el orden correcto
+          const orderedStages = ['Define', 'Measure', 'Analyze', 'Improve', 'Control']
+            .map(stageName => 
+              mappedStages.find(s => s.name === stageName) || 
+              { name: stageName, started: false, completed: false }
+            );
+            
+          setDmaicStages(orderedStages);
+          
+          // Establecer el stage actual basado en la primera etapa no completada
+          const firstIncompleteStage = orderedStages.find(stage => !stage.completed);
+          if (firstIncompleteStage) {
+            setCurrentStage(firstIncompleteStage.name);
+          }
+          
+          // Cargar tarjetas para cada fase desde stage.data
+          loadCardsFromStageData(projectData.dmaicStages);
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching project data:", error);
+        setError("Failed to load project data. Please try again.");
+        setLoading(false);
+      }
+    };
+    
+    fetchProjectData();
+  }, [projectId, accessToken]);
+  
+  // Función para cargar tarjetas desde los datos de cada etapa
+  const loadCardsFromStageData = (stages) => {
+    // Para cada etapa, buscar sus datos y convertirlos en tarjetas
+    stages.forEach(stage => {
+      const stageData = stage.data || {};
+      const cardsArray = stageData.cards || [];
+      
+      switch (stage.stage_name) {
+        case 'Define':
+          setDefineCards(cardsArray.length > 0 ? cardsArray : []); 
+          break;
+        case 'Measure':
+          setMeasureCards(cardsArray.length > 0 ? cardsArray : []);
+          break;
+        case 'Analyze':
+          setAnalyzeCards(cardsArray.length > 0 ? cardsArray : []);
+          break;
+        case 'Improve':
+          setImproveCards(cardsArray.length > 0 ? cardsArray : []);
+          break;
+        case 'Control':
+          setControlCards(cardsArray.length > 0 ? cardsArray : []);
+          break;
+        default:
+          break;
+      }
+    });
+  };
+
+  // Función para guardar los cambios en el servidor
+  const saveStageData = async (stageName, cards) => {
+    try {
+      const stageData = { cards };
+      const completed = false; // Esto podría ser un parámetro adicional
+      
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/projects/dmaic/${projectId}/${stageName}`,
+        { data: stageData, completed },
+        {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+          withCredentials: true,
+        }
+      );
+      
+      console.log(`${stageName} stage data saved successfully`);
+    } catch (error) {
+      console.error(`Error saving ${stageName} stage data:`, error);
+      // Podrías mostrar un toast o notificación aquí
+    }
+  };
+
   // Función para añadir una nueva tarjeta
   const handleAddCard = (type) => {
     const newId = Date.now(); // ID único
@@ -108,240 +183,146 @@ const DMAIC = () => {
     }
 
     // Actualizar el array correspondiente al currentStage
-    switch (currentStage) {
-      case 'Define':
-        setDefineCards([...defineCards, newCard]);
-        break;
-      case 'Measure':
-        setMeasureCards([...measureCards, newCard]);
-        break;
-      case 'Analyze':
-        setAnalyzeCards([...analyzeCards, newCard]);
-        break;
-      case 'Improve':
-        setImproveCards([...improveCards, newCard]);
-        break;
-      case 'Control':
-        setControlCards([...controlCards, newCard]);
-        break;
-      default:
-        console.error(`Stage desconocido: ${currentStage}`);
+    const updatedCards = getCardsForStage(currentStage).concat(newCard);
+    updateCardsForStage(currentStage, updatedCards);
+    
+    // Guardar en el servidor
+    saveStageData(currentStage, updatedCards);
+  };
+
+  // Función para obtener las tarjetas de la etapa actual
+  const getCardsForStage = (stageName) => {
+    switch (stageName) {
+      case 'Define': return defineCards;
+      case 'Measure': return measureCards;
+      case 'Analyze': return analyzeCards;
+      case 'Improve': return improveCards;
+      case 'Control': return controlCards;
+      default: return [];
+    }
+  };
+  
+  // Función para actualizar las tarjetas de una etapa
+  const updateCardsForStage = (stageName, cards) => {
+    switch (stageName) {
+      case 'Define': setDefineCards(cards); break;
+      case 'Measure': setMeasureCards(cards); break;
+      case 'Analyze': setAnalyzeCards(cards); break;
+      case 'Improve': setImproveCards(cards); break;
+      case 'Control': setControlCards(cards); break;
+      default: break;
     }
   };
 
-
   // Función para eliminar una tarjeta
   const handleDeleteCard = (id) => {
-    const cardHandlers = {
-      Define: setDefineCards,
-      Measure: setMeasureCards,
-      Analyze: setAnalyzeCards,
-      Improve: setImproveCards,
-      Control: setControlCards,
-    };
-
-    // Si el currentStage tiene un handler, aplícalo
-    cardHandlers[currentStage]?.((prev) => prev.filter((card) => card.id !== id));
-
-    // Si no existe el currentStage, muestra un error
-    if (!cardHandlers[currentStage]) {
-      console.error(`Stage desconocido: ${currentStage}`);
-    }
+    const currentCards = getCardsForStage(currentStage);
+    const updatedCards = currentCards.filter((card) => card.id !== id);
+    updateCardsForStage(currentStage, updatedCards);
+    
+    // Guardar en el servidor
+    saveStageData(currentStage, updatedCards);
   };
 
   // Función para actualizar una tarjeta (al guardar cambios)
   const handleSaveCard = (id, newData) => {
-    setDefineCards((prev) =>
-      prev.map((card) => (card.id === id ? { ...card, data: newData } : card))
+    const currentCards = getCardsForStage(currentStage);
+    const updatedCards = currentCards.map((card) => 
+      card.id === id ? { ...card, data: newData } : card
     );
+    updateCardsForStage(currentStage, updatedCards);
+    
+    // Guardar en el servidor
+    saveStageData(currentStage, updatedCards);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col pt-28 items-center justify-center">
+        <div className="animate-spin h-12 w-12 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+        <p className="mt-4 text-gray-600">Loading project data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col pt-28 items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-md">
+          <h2 className="text-xl font-bold text-red-600 mb-4">Error</h2>
+          <p className="text-gray-700 mb-4">{error}</p>
+          <button 
+            onClick={() => navigate('/projects')}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Back to Projects
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col pt-28">
       <Header
-        title="Hacer cada fase monocromatica"
+        title={project?.name || "DMAIC Process"}
         currentStage={currentStage}
         setCurrentStage={setCurrentStage}
         dmaicStages={dmaicStages} />
 
       {(() => {
-        switch (currentStage) {
-          case 'Define':
-            return (
-              <>
-                {/* Render de todas las cards de Define */}
-                {defineCards.map((card) => {
-                  switch (card.type) {
-                    case 'IS_IS_NOT':
-                      return (
-                        <IsIsNotCard
-                          key={card.id}
-                          data={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newData) => handleSaveCard(card.id, newData)}
-                        />
-                      );
-                    case 'RICH_TEXT':
-                      return (
-                        <RichTextCard
-                          key={card.id}
-                          initialValue={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newContent) =>
-                            handleSaveCard(card.id, { content: newContent })
-                          }
-                        />
-                      );
-                      case 'SIPOC':
-                        return (
-                          <SipocCard
-                            key={card.id}
-                            data={card.data}
-                            onDelete={() => handleDeleteCard(card.id)}
-                            onSave={(newData) => handleSaveCard(card.id, newData)}
-                          />
-                        );
-                    default:
-                      return null;
-                  }
-                })}
-              </>
-            );
-
-          case 'Measure':
-            return (
-              <>
-                {/* Render de todas las cards de Measure */}
-                {measureCards.map((card) => {
-                  switch (card.type) {
-                    case 'IS_IS_NOT':
-                      return (
-                        <IsIsNotCard
-                          key={card.id}
-                          data={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newData) => handleSaveCard(card.id, newData)}
-                        />
-                      );
-                    case 'RICH_TEXT':
-                      return (
-                        <RichTextCard
-                          key={card.id}
-                          initialValue={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newContent) =>
-                            handleSaveCard(card.id, { content: newContent })
-                          }
-                        />
-                      );
-                    default:
-                      return null;
-                  }
-                })}
-              </>
-            );
-
-          // Casos adicionales (Analyze, Improve, Control) pueden seguir la misma estructura
-          case 'Analyze':
-            return (
-              <>
-                {/* Render de todas las cards de Analyze */}
-                {analyzeCards.map((card) => {
-                  switch (card.type) {
-                    case 'IS_IS_NOT':
-                      return (
-                        <IsIsNotCard
-                          key={card.id}
-                          data={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newData) => handleSaveCard(card.id, newData)}
-                        />
-                      );
-                    case 'RICH_TEXT':
-                      return (
-                        <RichTextCard
-                          key={card.id}
-                          initialValue={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newContent) =>
-                            handleSaveCard(card.id, { content: newContent })
-                          }
-                        />
-                      );
-                    default:
-                      return null;
-                  }
-                })}
-              </>
-            );
-          case 'Improve':
-            return (
-              <>
-                {/* Render de todas las cards de Analyze */}
-                {improveCards.map((card) => {
-                  switch (card.type) {
-                    case 'IS_IS_NOT':
-                      return (
-                        <IsIsNotCard
-                          key={card.id}
-                          data={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newData) => handleSaveCard(card.id, newData)}
-                        />
-                      );
-                    case 'RICH_TEXT':
-                      return (
-                        <RichTextCard
-                          key={card.id}
-                          initialValue={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newContent) =>
-                            handleSaveCard(card.id, { content: newContent })
-                          }
-                        />
-                      );
-                    default:
-                      return null;
-                  }
-                })}
-              </>
-            );
-          case 'Control':
-            return (
-              <>
-                {/* Render de todas las cards de Analyze */}
-                {controlCards.map((card) => {
-                  switch (card.type) {
-                    case 'IS_IS_NOT':
-                      return (
-                        <IsIsNotCard
-                          key={card.id}
-                          data={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newData) => handleSaveCard(card.id, newData)}
-                        />
-                      );
-                    case 'RICH_TEXT':
-                      return (
-                        <RichTextCard
-                          key={card.id}
-                          initialValue={card.data}
-                          onDelete={() => handleDeleteCard(card.id)}
-                          onSave={(newContent) =>
-                            handleSaveCard(card.id, { content: newContent })
-                          }
-                        />
-                      );
-                    default:
-                      return null;
-                  }
-                })}
-              </>
-            );
-          default:
-            return <p>No encontramos nada por aquí... empieza creándolo desde "+"</p>;
+        const currentCards = getCardsForStage(currentStage);
+        
+        if (currentCards.length === 0) {
+          return (
+            <div className="container mx-auto p-8 text-center">
+              <p className="text-gray-600 mb-4">No items found for this stage. Use the + button to add content.</p>
+            </div>
+          );
         }
+        
+        return (
+          <>
+            {/* Render de todas las cards del stage actual */}
+            {currentCards.map((card) => {
+              switch (card.type) {
+                case 'IS_IS_NOT':
+                  return (
+                    <IsIsNotCard
+                      key={card.id}
+                      data={card.data}
+                      onDelete={() => handleDeleteCard(card.id)}
+                      onSave={(newData) => handleSaveCard(card.id, newData)}
+                    />
+                  );
+                case 'RICH_TEXT':
+                  return (
+                    <RichTextCard
+                      key={card.id}
+                      initialValue={card.data}
+                      onDelete={() => handleDeleteCard(card.id)}
+                      onSave={(newContent) =>
+                        handleSaveCard(card.id, { ...card.data, content: newContent })
+                      }
+                    />
+                  );
+                case 'SIPOC':
+                  return (
+                    <SipocCard
+                      key={card.id}
+                      data={card.data}
+                      onDelete={() => handleDeleteCard(card.id)}
+                      onSave={(newData) => handleSaveCard(card.id, newData)}
+                    />
+                  );
+                default:
+                  return null;
+              }
+            })}
+          </>
+        );
       })()}
+      
       {/* Botón para añadir nuevas tarjetas */}
       <FloatingButton
         addIsIsNot={() => handleAddCard('IS_IS_NOT')}
@@ -355,4 +336,3 @@ const DMAIC = () => {
 };
 
 export default DMAIC;
-

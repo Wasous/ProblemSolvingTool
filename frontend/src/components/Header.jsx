@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 // Menu icons as components
@@ -44,7 +44,13 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
+  const params = useParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Check if we're on a DMAIC page by either route path or projectId param
+  const isDmaicPage = location.pathname.includes('/DMAIC') || params.projectId;
+  // Determine if we're looking at a specific project
+  const isSpecificProject = Boolean(params.projectId);
 
   const handleHeaderClick = () => {
     navigate(isAuthenticated ? '/main' : '/');
@@ -142,9 +148,7 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
             </h1>
 
             {/* New Project Button - Hidden on mobile */}
-            {location.pathname !== '/DMAIC' && 
-             location.pathname !== '/newProject' && 
-             isAuthenticated && (
+            {!isDmaicPage && isAuthenticated && (
               <button
                 className="hidden lg:flex bg-indigo-600 text-white px-4 py-2 rounded-lg items-center shadow-md hover:bg-indigo-700 transition duration-200"
                 onClick={() => navigate('/newProject')}
@@ -156,8 +160,8 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
             )}
           </div>
 
-          {/* DMAIC Menu */}
-          {location.pathname === '/DMAIC' && (
+          {/* DMAIC Menu - Show only on DMAIC pages with stages data */}
+          {isDmaicPage && dmaicStages && dmaicStages.length > 0 && currentStage && setCurrentStage && (
             <div className="hidden lg:block">
               <DmaicMenu
                 stages={dmaicStages}
@@ -186,9 +190,7 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
         {isMenuOpen && (
           <div className="lg:hidden py-4 border-t border-slate-700">
             {/* Mobile New Project Button */}
-            {location.pathname !== '/DMAIC' && 
-             location.pathname !== '/newProject' && 
-             isAuthenticated && (
+            {!isDmaicPage && isAuthenticated && (
               <button
                 className="w-full mb-4 bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center justify-center shadow-md hover:bg-indigo-700 transition duration-200"
                 onClick={() => {
@@ -202,7 +204,7 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
             )}
 
             {/* Mobile DMAIC Menu */}
-            {location.pathname === '/DMAIC' && (
+            {isDmaicPage && dmaicStages && dmaicStages.length > 0 && currentStage && setCurrentStage && (
               <div className="mb-4">
                 <DmaicMenu
                   stages={dmaicStages}

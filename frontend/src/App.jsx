@@ -26,6 +26,7 @@ function App() {
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/newProject" element={<CreateProject />} />
             <Route path="/DMAIC" element={<DMAIC />} />
+            <Route path="/DMAIC/:projectId" element={<DMAIC />} />
           </Route>
 
           {/* Redirect any unknown route to / */}
