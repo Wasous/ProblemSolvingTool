@@ -6,32 +6,14 @@ import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import ProjectCard from '../components/ProjectRow';
 import { FaSearch, FaFilter } from 'react-icons/fa';
-
+import { getCurrentPhase, sortDmaicStages } from '../utils/dmaicUtils';
 // Helper functions
-const getCurrentPhase = (stages) => {
-    if (!stages || stages.length === 0) return "N/A";
-    const current = stages.find(stage => !stage.completed);
-    return current ? current.stage_name : "Completed";
-};
+
+
 
 const KanbanView = ({ groupedProjects }) => {
-    const [scrollLeft, setScrollLeft] = useState(0);
     const contentRef = useRef(null);
     const scrollbarRef = useRef(null);
-
-    const handleMainScroll = (e) => {
-        setScrollLeft(e.target.scrollLeft);
-        if (scrollbarRef.current) {
-            scrollbarRef.current.scrollLeft = e.target.scrollLeft;
-        }
-    };
-
-    const handleScrollbarScroll = (e) => {
-        setScrollLeft(e.target.scrollLeft);
-        if (contentRef.current) {
-            contentRef.current.scrollLeft = e.target.scrollLeft;
-        }
-    };
 
     return (
         <div
@@ -119,11 +101,12 @@ const ProjectsList = () => {
     });
 
     const sortedProjects = [...filteredProjects].sort((a, b) => {
+        const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
+        
         switch (sortBy) {
             case 'name':
                 return a.project.name.localeCompare(b.project.name);
             case 'priority':
-                const priorityOrder = { 'High': 1, 'Medium': 2, 'Low': 3 };
                 return (priorityOrder[a.project.priority] || 4) - (priorityOrder[b.project.priority] || 4);
             case 'date':
             default:

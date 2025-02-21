@@ -6,12 +6,11 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButton from '../components/FloatingButton';
 import { useAuth } from '../contexts/AuthContext';
-
-// Import our new components
 import LeftPanel from '../components/LeftPanel';
 import RightPanel from '../components/RightPanel';
 import DmaicNavigation from '../components/DmaicNavigation';
 import ContentArea from '../components/ContentArea';
+//import { getCurrentPhase, sortDmaicStages } from '../utils/dmaicUtils';
 
 const DMAIC = () => {
   const { projectId } = useParams();

@@ -2,12 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { FaChevronDown, FaChevronUp, FaTag, FaCalendarAlt, FaFlag, FaUser, FaUsers, FaClock } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-
-const getCurrentPhase = (stages) => {
-    if (!stages || stages.length === 0) return "N/A";
-    const current = stages.find(stage => !stage.completed);
-    return current ? current.stage_name : "Completed";
-};
+import { getCurrentPhase, sortDmaicStages } from '../utils/dmaicUtils';
 
 // Date formatting helper.
 const formatTimeAgo = (dateString) => {
@@ -25,6 +20,8 @@ const formatTimeAgo = (dateString) => {
 };
 
 const DMAICStageIndicator = ({ stages }) => {
+    console.log('DMAICStageIndicator received stages:', stages);
+    
     const stageColors = {
         Define: 'bg-blue-500',
         Measure: 'bg-green-500',
@@ -34,11 +31,16 @@ const DMAICStageIndicator = ({ stages }) => {
         Completed: 'bg-gray-500'
     };
 
+    // Use the shared utility function to sort the stages
+    const sortedStages = sortDmaicStages(stages);
+    console.log('DMAICStageIndicator sorted stages:', sortedStages.map(s => s.stage_name));
+    
     const currentStage = getCurrentPhase(stages);
+    console.log('DMAICStageIndicator calculated currentStage:', currentStage);
 
     return (
         <div className="flex space-x-1 mt-2">
-            {stages.map((stage, index) => (
+            {sortedStages && sortedStages.map((stage, index) => (
                 <div
                     key={index}
                     className={`h-2 flex-1 rounded-full ${stage.completed
@@ -55,6 +57,9 @@ const DMAICStageIndicator = ({ stages }) => {
 };
 
 const ProjectCard = ({ project, projectId, isOwner, teamMembers = [] }) => {
+    console.log('ProjectCard rendering with project:', projectId, project.name);
+    console.log('Project dmaicStages:', project.dmaicStages);
+    
     const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();
 
