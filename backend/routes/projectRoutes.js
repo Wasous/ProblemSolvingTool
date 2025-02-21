@@ -235,9 +235,19 @@ router.get('/:id', authenticateToken, async (req, res) => {
         const project = await Project.findByPk(projectId, {
             include: [
                 {
+                    model: User,
+                    as: 'owner',
+                    attributes: ['id', 'username'] // Exclude password
+                },
+                {
                     model: Team,
-                    include: [User],
                     as: 'teamMembers',
+                    include: [
+                        {
+                            model: User,
+                            attributes: ['id', 'username'] // For team members' users
+                        }
+                    ]
                 },
                 {
                     model: DmaicStage,
