@@ -4,25 +4,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
 const { User } = require('../models'); // Asegúrate de que en models/index.js exportes User
-
-// Middleware para autenticar el token
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) {
-        return res.status(401).json({ message: 'Falta el token en la cabecera Authorization' });
-    }
-    const token = authHeader.split(' ')[1];
-    if (!token) {
-        return res.status(401).json({ message: 'Token no proporcionado' });
-    }
-    jwt.verify(token, process.env.JWT_SECRET, (err, userData) => {
-        if (err) {
-            return res.status(403).json({ message: 'Token inválido o expirado' });
-        }
-        req.user = userData;
-        next();
-    });
-}
+const { authenticateToken } = require('../middleware/auth');
 
 // Endpoint optimizado para buscar usuarios con paginación
 // GET /api/users/search?term=algo&page=1&limit=10

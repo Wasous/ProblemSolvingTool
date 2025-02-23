@@ -1,122 +1,157 @@
 import React from 'react';
-import { FaEdit, FaUsers, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaCalendarAlt, FaTag, FaCheckCircle, FaClock } from 'react-icons/fa';
 
 const LeftPanel = ({
     isOpen,
     project,
-    isOwner,
-    dmaicStages
+    currentStage
 }) => {
-    return (
-        <div className={`bg-white shadow-lg fixed top-32 bottom-0 z-10 transition-all duration-300 overflow-y-auto
-      ${isOpen ? 'left-0 w-80' : 'left-0 w-0'}`}>
-            <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-6">Project Details</h2>
+    if (!project) return null;
 
-                {/* Project Info */}
-                <div className="space-y-6">
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Basic Information
-                        </h3>
-                        <div className="space-y-2">
-                            <p className="flex justify-between">
-                                <span className="text-gray-500">Name:</span>
-                                <span className="font-medium text-gray-800">{project?.name}</span>
-                            </p>
-                            <p className="flex justify-between">
-                                <span className="text-gray-500">Methodology:</span>
-                                <span className="font-medium text-gray-800">{project?.methodology}</span>
-                            </p>
-                            <p className="flex justify-between">
-                                <span className="text-gray-500">Priority:</span>
-                                <span className="font-medium text-gray-800">{project?.priority}</span>
-                            </p>
-                        </div>
-                    </div>
+    const calculatePhaseProgress = (stages) => {
+        if (!stages || stages.length === 0) return {};
 
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Timeline
-                        </h3>
-                        <div className="space-y-2">
-                            <p className="flex justify-between">
-                                <span className="text-gray-500">Start Date:</span>
-                                <span className="font-medium text-gray-800">
-                                    {project?.start_date ? new Date(project.start_date).toLocaleDateString() : 'Not set'}
-                                </span>
-                            </p>
-                            <p className="flex justify-between">
-                                <span className="text-gray-500">Target End:</span>
-                                <span className="font-medium text-gray-800">
-                                    {project?.end_date ? new Date(project.end_date).toLocaleDateString() : 'Not set'}
-                                </span>
-                            </p>
-                        </div>
-                    </div>
+        const progress = {
+            Define: { completed: false, data: {} },
+            Measure: { completed: false, data: {} },
+            Analyze: { completed: false, data: {} },
+            Improve: { completed: false, data: {} },
+            Control: { completed: false, data: {} }
+        };
 
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Team
-                        </h3>
-                        <div className="space-y-2">
-                            <p className="flex justify-between items-center">
-                                <span className="text-gray-500">Owner:</span>
-                                <span className="font-medium text-gray-800">{project?.owner?.username || 'Not assigned'}</span>
-                            </p>
-                            <div>
-                                <p className="text-gray-500 mb-2">Team Members:</p>
-                                <div className="grid grid-cols-1 gap-1">
-                                    {project?.teamMembers?.map((member, idx) => (
-                                        <div key={idx} className="bg-gray-100 px-3 py-1 rounded text-sm flex justify-between">
-                                            <span>{member.User?.username}</span>
-                                            <span className="text-gray-500 text-xs">{member.role}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        stages.forEach(stage => {
+            if (stage.data) {
+                progress[stage.stage_name] = {
+                    completed: stage.completed,
+                    data: stage.data
+                };
+            }
+        });
 
-                    {/* Phase Summary */}
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            Phase Summary
-                        </h3>
-                        <div className="space-y-2">
-                            {dmaicStages?.map((stage, idx) => (
-                                <div key={idx} className="flex items-center">
-                                    <div className={`w-3 h-3 rounded-full mr-2 ${stage.completed ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                                    <span className={`text-sm ${stage.completed ? 'text-gray-800' : 'text-gray-500'}`}>
-                                        {stage.name}
-                                    </span>
-                                    {stage.completed && (
-                                        <span className="ml-auto text-xs text-gray-500">Completed</span>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+        return progress;
+    };
 
-                    {/* Edit Section (if owner) */}
-                    {isOwner && (
-                        <div className="pt-4 border-t border-gray-200">
-                            <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-4">
-                                Admin Actions
-                            </h3>
-                            <div className="space-y-3">
-                                <button className="w-full bg-blue-100 text-blue-700 px-4 py-2 rounded flex items-center justify-center">
-                                    <FaEdit className="mr-2" /> Edit Project Details
-                                </button>
-                                <button className="w-full bg-blue-100 text-blue-700 px-4 py-2 rounded flex items-center justify-center">
-                                    <FaUsers className="mr-2" /> Manage Team
-                                </button>
-                                <button className="w-full bg-blue-100 text-blue-700 px-4 py-2 rounded flex items-center justify-center">
-                                    <FaCalendarAlt className="mr-2" /> Update Timeline
-                                </button>
-                            </div>
-                        </div>
+    const phaseProgress = calculatePhaseProgress(project.dmaicStages);
+
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Not set';
+        return new Date(dateString).toLocaleDateString();
+    };
+
+    const PhaseSummary = ({ phase, isActive }) => {
+        const phaseData = phaseProgress[phase]?.data || {};
+
+        const getSummaryContent = () => {
+            switch (phase) {
+                case 'Define':
+                    return phaseData.problemStatement
+                        ? <p className="text-sm text-gray-600 line-clamp-2">{phaseData.problemStatement}</p>
+                        : <p className="text-sm text-gray-400 italic">No problem statement defined</p>;
+                case 'Measure':
+                    return phaseData.currentMetrics
+                        ? <p className="text-sm text-gray-600 line-clamp-2">{phaseData.currentMetrics}</p>
+                        : <p className="text-sm text-gray-400 italic">No metrics defined</p>;
+                case 'Analyze':
+                    return phaseData.rootCauseAnalysis
+                        ? <p className="text-sm text-gray-600 line-clamp-2">{phaseData.rootCauseAnalysis}</p>
+                        : <p className="text-sm text-gray-400 italic">No root cause analysis</p>;
+                case 'Improve':
+                    return phaseData.proposedSolutions
+                        ? <p className="text-sm text-gray-600 line-clamp-2">{phaseData.proposedSolutions}</p>
+                        : <p className="text-sm text-gray-400 italic">No solutions proposed</p>;
+                case 'Control':
+                    return phaseData.controlPlan
+                        ? <p className="text-sm text-gray-600 line-clamp-2">{phaseData.controlPlan}</p>
+                        : <p className="text-sm text-gray-400 italic">No control plan defined</p>;
+                default:
+                    return null;
+            }
+        };
+
+        return (
+            <div className={`p-3 rounded-lg ${isActive ? 'bg-blue-50 border border-blue-100' :
+                    phaseProgress[phase]?.completed ? 'bg-green-50 border border-green-100' :
+                        'bg-gray-50 border border-gray-100'
+                }`}>
+                <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-gray-700">{phase}</h4>
+                    {phaseProgress[phase]?.completed && (
+                        <FaCheckCircle className="text-green-500" />
                     )}
+                </div>
+                {getSummaryContent()}
+            </div>
+        );
+    };
+
+    return (
+        <div className={`fixed top-16 bottom-0 left-0 w-80 bg-white shadow-lg transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'
+            } overflow-y-auto z-10`}>
+            <div className="p-6">
+                {/* Project Header */}
+                <div className="mb-6">
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">{project.name}</h2>
+                    <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex items-center">
+                            <FaUser className="mr-2" />
+                            <span>{project.owner?.username || 'Unknown Owner'}</span>
+                        </div>
+                        <div className="flex items-center">
+                            <FaCalendarAlt className="mr-2" />
+                            <span>{formatDate(project.start_date)} - {formatDate(project.end_date)}</span>
+                        </div>
+                        <div className="flex items-center">
+                            <FaClock className="mr-2" />
+                            <span>Updated {new Date(project.updatedAt).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Project Description */}
+                <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Description
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                        {project.description || 'No description provided'}
+                    </p>
+                </div>
+
+                {/* Tags */}
+                <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
+                        Tags
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {project.tags?.map((tag, index) => (
+                            <span
+                                key={index}
+                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700"
+                            >
+                                <FaTag className="mr-1" />
+                                {tag.name}
+                            </span>
+                        ))}
+                        {(!project.tags || project.tags.length === 0) && (
+                            <span className="text-sm text-gray-400 italic">No tags</span>
+                        )}
+                    </div>
+                </div>
+
+                {/* DMAIC Progress */}
+                <div>
+                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
+                        Phase Progress
+                    </h3>
+                    <div className="space-y-3">
+                        {['Define', 'Measure', 'Analyze', 'Improve', 'Control'].map(phase => (
+                            <PhaseSummary
+                                key={phase}
+                                phase={phase}
+                                isActive={currentStage === phase}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>

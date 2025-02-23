@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { logout as apiLogout, refreshToken as apiRefreshToken } from '../services/authService';
-import { jwtDecode } from 'jwt-decode';  // Ensure default import
+import { jwtDecode } from 'jwt-decode';
 
-// Helper function to check token expiration
 const isTokenExpired = (token) => {
     try {
         const decoded = jwtDecode(token);
@@ -15,49 +14,75 @@ const isTokenExpired = (token) => {
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-
-    const tokenFromStorage = localStorage.getItem('accessToken');
-
-    const [accessToken, setAccessToken] = useState(tokenFromStorage || null);
+    const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken'));
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('currentUser');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
     const [loading, setLoading] = useState(true);
 
-    // Login: Save token in state and localStorage
     const login = (token, userId, userName) => {
         setAccessToken(token);
+        setUser({ id: userId, username: userName });
         localStorage.setItem('accessToken', token);
         localStorage.setItem('currentUser', JSON.stringify({ id: userId, username: userName }));
     };
 
-    // Refresh token when app loads or when needed
     const refreshAccessToken = async () => {
         try {
             const { accessToken: newToken } = await apiRefreshToken();
+            if (!newToken) {
+                throw new Error('No se recibió nuevo token');
+            }
             setAccessToken(newToken);
             localStorage.setItem('accessToken', newToken);
+            return true;
         } catch (error) {
-            console.error('No se pudo refrescar el token', error);
-            logout();
+            console.error('Error al refrescar token:', error);
+            await logout();
+            return false;
         }
     };
 
-    // Logout: Remove token from state and storage
     const logout = async () => {
-        await apiLogout();
+        try {
+            await apiLogout();
+        } catch (error) {
+            console.error('Error durante logout:', error);
+        }
         setAccessToken(null);
+        setUser(null);
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('currentUser');
     };
 
-    // On app startup, attempt to refresh the token
     useEffect(() => {
-        refreshAccessToken().finally(() => setLoading(false));
+        const initAuth = async () => {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                if (isTokenExpired(token)) {
+                    await refreshAccessToken();
+                }
+            }
+            setLoading(false);
+        };
+
+        initAuth();
     }, []);
 
-    // Compute isAuthenticated by checking that we have a token and it's not expired.
     const isAuthenticated = accessToken && !isTokenExpired(accessToken);
-    // console.log("isTokenExpired(accessToken):", isTokenExpired(accessToken));
 
     return (
-        <AuthContext.Provider value={{ accessToken, isAuthenticated, login, logout, refreshAccessToken }}>
+        <AuthContext.Provider
+            value={{
+                accessToken,
+                isAuthenticated,
+                user,
+                login,
+                logout,
+                refreshAccessToken
+            }}
+        >
             {!loading && children}
         </AuthContext.Provider>
     );

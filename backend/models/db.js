@@ -2,8 +2,6 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-const sslEnabled = process.env.DB_SSL === 'true';
-
 const sequelize = new Sequelize(
     process.env.DB_NAME,
     process.env.DB_USER,
@@ -13,15 +11,16 @@ const sequelize = new Sequelize(
         port: parseInt(process.env.DB_PORT, 10),
         dialect: 'postgres',
         logging: false,
-        dialectOptions: sslEnabled
+        dialectOptions: process.env.DB_SSL === 'true'
             ? {
                 ssl: {
                     require: true,
                     rejectUnauthorized: false,
                 }
             }
-            : {},
+            : {}
     }
 );
 
+// Export the Sequelize instance directly
 module.exports = sequelize;

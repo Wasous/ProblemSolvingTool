@@ -1,43 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const jwt = require('jsonwebtoken');
 const { Project, Team, DmaicStage, User, Tag } = require('../models');
-
-
-// =============================================================
-// Middleware para verificar token y extraer user_id
-// =============================================================
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) {
-        return res.status(401).json({ message: 'Falta el token en la cabecera Authorization' });
-    }
-    const token = authHeader.split(' ')[1]; // Bearer <token>
-    if (!token) {
-        return res.status(401).json({ message: 'Token no proporcionado' });
-    }
-    jwt.verify(token, process.env.JWT_SECRET, (err, userData) => {
-        if (err) {
-            return res.status(403).json({ message: 'Token inválido o expirado' });
-        }
-        console.log("Token verificado, userData:", userData);
-        req.user = userData;
-        next();
-    });
-}
+const { authenticateToken } = require('../middleware/auth');
 
 // =============================================================
 // 1. Crear un proyecto (POST /api/projects)
 // =============================================================
 router.post('/', authenticateToken, async (req, res) => {
     try {
-        // Extraemos el userId del token y lo asignamos a owner_id
         const { userId: owner_id } = req.user;
         if (!owner_id) {
             return res.status(400).json({ message: 'No se puede determinar el user_id del token.' });
         }
 
-        // Extraemos los campos del body, incluyendo "tags"
         const { name, description, methodology, start_date, end_date, priority, tags } = req.body;
 
         if (!name || !methodology) {
@@ -55,14 +30,116 @@ router.post('/', authenticateToken, async (req, res) => {
             priority
         });
 
-        // Crear la estructura DMAIC inicial
-        const stages = ['Define', 'Measure', 'Analyze', 'Improve', 'Control'];
-        const dmaicStages = stages.map(stage => ({
-            project_id: newProject.id,
-            stage_name: stage,
-            completed: false,
-            data: {},
-        }));
+        // Crear la estructura DMAIC inicial con la nueva estructura de datos
+        const dmaicStages = [
+            {
+                stage_name: 'Define',
+                project_id: newProject.id,
+                completed: false,
+                data: {
+                    requirements: {
+                        problem: { completed: false },
+                        scope: { completed: false },
+                        impact: { completed: false },
+                        stakeholders: { completed: false },
+                        team: { completed: false }
+                    },
+                    inputs: {},
+                    tools: [],
+                    attachments: [],
+                    history: [{
+                        action: 'created',
+                        timestamp: new Date().toISOString(),
+                        userId: owner_id
+                    }]
+                }
+            },
+            {
+                stage_name: 'Measure',
+                project_id: newProject.id,
+                completed: false,
+                data: {
+                    requirements: {
+                        metrics: { completed: false },
+                        'data-plan': { completed: false },
+                        process: { completed: false },
+                        variables: { completed: false }
+                    },
+                    inputs: {},
+                    tools: [],
+                    attachments: [],
+                    history: [{
+                        action: 'created',
+                        timestamp: new Date().toISOString(),
+                        userId: owner_id
+                    }]
+                }
+            },
+            {
+                stage_name: 'Analyze',
+                project_id: newProject.id,
+                completed: false,
+                data: {
+                    requirements: {
+                        'root-cause': { completed: false },
+                        'data-analysis': { completed: false },
+                        validation: { completed: false },
+                        opportunities: { completed: false }
+                    },
+                    inputs: {},
+                    tools: [],
+                    attachments: [],
+                    history: [{
+                        action: 'created',
+                        timestamp: new Date().toISOString(),
+                        userId: owner_id
+                    }]
+                }
+            },
+            {
+                stage_name: 'Improve',
+                project_id: newProject.id,
+                completed: false,
+                data: {
+                    requirements: {
+                        solutions: { completed: false },
+                        implementation: { completed: false },
+                        pilot: { completed: false },
+                        results: { completed: false }
+                    },
+                    inputs: {},
+                    tools: [],
+                    attachments: [],
+                    history: [{
+                        action: 'created',
+                        timestamp: new Date().toISOString(),
+                        userId: owner_id
+                    }]
+                }
+            },
+            {
+                stage_name: 'Control',
+                project_id: newProject.id,
+                completed: false,
+                data: {
+                    requirements: {
+                        'control-plan': { completed: false },
+                        monitoring: { completed: false },
+                        documentation: { completed: false },
+                        handover: { completed: false }
+                    },
+                    inputs: {},
+                    tools: [],
+                    attachments: [],
+                    history: [{
+                        action: 'created',
+                        timestamp: new Date().toISOString(),
+                        userId: owner_id
+                    }]
+                }
+            }
+        ];
+
         await DmaicStage.bulkCreate(dmaicStages);
 
         // Agregar al owner en la tabla Team con rol 'Owner'
@@ -72,9 +149,8 @@ router.post('/', authenticateToken, async (req, res) => {
             role: 'Owner',
         });
 
-        // Si se incluyen etiquetas en el payload, asociarlas al proyecto
+        // Si se incluyen etiquetas, asociarlas al proyecto
         if (tags && Array.isArray(tags) && tags.length > 0) {
-            // Se asume que "tags" es un array de IDs de etiquetas
             await newProject.setTags(tags);
         }
 
@@ -93,8 +169,7 @@ router.post('/', authenticateToken, async (req, res) => {
 // =============================================================
 router.get('/', authenticateToken, async (req, res) => {
     try {
-        const { userId: userId } = req.user;
-        console.log(userId)
+        const { userId } = req.user;
         if (!userId) {
             return res.status(400).json({ message: 'No se puede determinar el user_id del token.' });
         }
@@ -176,14 +251,14 @@ router.post('/:id/team', authenticateToken, async (req, res) => {
 });
 
 // =============================================================
-// 4. Guardar progreso en DMAIC (PUT /api/dmaic/:projectId/:stage)
+// 4. Guardar progreso en DMAIC (PUT /api/projects/dmaic/:projectId/:stage)
 // =============================================================
 router.put('/dmaic/:projectId/:stage', authenticateToken, async (req, res) => {
     try {
         const { projectId, stage } = req.params;
         const { data, completed } = req.body;
+        const { userId } = req.user;
 
-        const { userId: userId } = req.user;
         const teamMember = await Team.findOne({
             where: { project_id: projectId, user_id: userId },
         });
@@ -198,11 +273,32 @@ router.put('/dmaic/:projectId/:stage', authenticateToken, async (req, res) => {
             return res.status(404).json({ message: 'Fase DMAIC no encontrada para este proyecto' });
         }
 
-        if (typeof data === 'object') {
-            dmaicStage.data = data;
+        // Actualizar datos y mantener historial
+        if (data) {
+            dmaicStage.data = {
+                ...dmaicStage.data,
+                ...data,
+                history: [
+                    ...(dmaicStage.data.history || []),
+                    {
+                        action: 'update',
+                        timestamp: new Date().toISOString(),
+                        userId
+                    }
+                ]
+            };
         }
+
+        // Actualizar estado de completado
         if (typeof completed === 'boolean') {
             dmaicStage.completed = completed;
+            if (completed) {
+                dmaicStage.data.history.push({
+                    action: 'completed',
+                    timestamp: new Date().toISOString(),
+                    userId
+                });
+            }
         }
 
         await dmaicStage.save();
@@ -222,7 +318,7 @@ router.put('/dmaic/:projectId/:stage', authenticateToken, async (req, res) => {
 router.get('/:id', authenticateToken, async (req, res) => {
     try {
         const projectId = req.params.id;
-        const { userId: userId } = req.user;
+        const { userId } = req.user;
 
         // Verificar si el usuario es miembro del proyecto
         const teamMember = await Team.findOne({
@@ -237,7 +333,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
                 {
                     model: User,
                     as: 'owner',
-                    attributes: ['id', 'username'] // Exclude password
+                    attributes: ['id', 'username']
                 },
                 {
                     model: Team,
@@ -245,7 +341,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
                     include: [
                         {
                             model: User,
-                            attributes: ['id', 'username'] // For team members' users
+                            attributes: ['id', 'username']
                         }
                     ]
                 },
@@ -272,19 +368,17 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // =============================================================
 // 6. Eliminar un miembro del equipo (DELETE /api/projects/:projectId/team/:userId)
-//    -> Solo el owner del proyecto puede eliminar miembros
 // =============================================================
 router.delete('/:projectId/team/:userId', authenticateToken, async (req, res) => {
     try {
         const { projectId, userId } = req.params;
         const { userId: currentUserId } = req.user;
 
-        // Verificar si el proyecto existe
         const project = await Project.findByPk(projectId);
         if (!project) {
             return res.status(404).json({ message: 'Proyecto no encontrado' });
         }
-        // Solo el owner puede eliminar miembros
+
         if (project.owner_id !== currentUserId) {
             return res.status(403).json({ message: 'No tienes permisos para eliminar miembros de este proyecto' });
         }

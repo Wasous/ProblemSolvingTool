@@ -127,6 +127,44 @@ const DMAIC = () => {
     });
   };
 
+  const handleSavePhase = async (phaseData) => {
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/projects/dmaic/${projectId}/${currentStage}`,
+        {
+          data: {
+            ...phaseData,
+            history: [
+              ...(phaseData.history || []),
+              {
+                action: 'update',
+                timestamp: new Date().toISOString(),
+                userId: project.owner_id
+              }
+            ]
+          }
+        },
+        {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+          withCredentials: true,
+        }
+      );
+
+      // Update local state with new data
+      setProject(prev => ({
+        ...prev,
+        dmaicStages: prev.dmaicStages.map(stage =>
+          stage.stage_name === currentStage ? response.data.dmaicStage : stage
+        )
+      }));
+
+      return response.data;
+    } catch (error) {
+      console.error('Error saving phase data:', error);
+      throw error;
+    }
+  };
+
   // Save changes to server
   const saveStageData = async (stageName, cards) => {
     try {
@@ -154,13 +192,12 @@ const DMAIC = () => {
       const currentStageIndex = dmaicStages.findIndex(stage => stage.name === currentStage);
       const nextStage = dmaicStages[currentStageIndex + 1]?.name;
 
-      // Get current cards for this stage
-      const currentCards = getCardsForStage(currentStage);
-
-      // Save current stage as completed
-      await axios.put(
+      const response = await axios.put(
         `${import.meta.env.VITE_API_URL}/projects/dmaic/${projectId}/${currentStage}`,
-        { data: { cards: currentCards }, completed: true },
+        {
+          data: { cards: getCardsForStage(currentStage) },
+          completed: true
+        },
         {
           headers: { 'Authorization': `Bearer ${accessToken}` },
           withCredentials: true,
@@ -168,6 +205,13 @@ const DMAIC = () => {
       );
 
       // Update local state
+      setProject(prev => ({
+        ...prev,
+        dmaicStages: prev.dmaicStages.map(stage =>
+          stage.stage_name === currentStage ? response.data.dmaicStage : stage
+        )
+      }));
+
       const updatedStages = dmaicStages.map(stage =>
         stage.name === currentStage
           ? { ...stage, completed: true }
@@ -178,7 +222,6 @@ const DMAIC = () => {
 
       setDmaicStages(updatedStages);
 
-      // Move to next stage if available
       if (nextStage) {
         setCurrentStage(nextStage);
       }
@@ -364,9 +407,11 @@ const DMAIC = () => {
         <RightPanel
           isOpen={rightPanelOpen}
           currentStage={currentStage}
-          handleAddCard={handleAddCard}
-          requirementsComplete={checkRequirementsComplete()}
-          completeCurrentPhase={completeCurrentPhase}
+          projectData={project}
+          onSave={handleSavePhase}         // Add this
+          onPhaseComplete={completeCurrentPhase}
+          handleAddCard={handleAddCard}    // Keep your existing prop
+          requirementsComplete={checkRequirementsComplete()}  // Keep your existing prop
         />
 
         {/* Right Panel Toggle Button */}

@@ -1,178 +1,198 @@
-import React from 'react';
-import { FaArrowRight } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaChevronRight, FaSave, FaCheckCircle, FaExclamationCircle, FaTools } from 'react-icons/fa';
+import { getPhaseRequirements, getPhaseDescription, getRecommendedTools } from '../utils/phaseRequirements';
 
 const RightPanel = ({
     isOpen,
     currentStage,
-    handleAddCard,
-    requirementsComplete,
-    completeCurrentPhase
+    projectData,
+    onSave,
+    onPhaseComplete,
+    onAddTool
 }) => {
-    // Get phase requirements based on current stage
-    const getPhaseRequirements = () => {
-        const requirements = {
-            'Define': [
-                { id: 'problem-statement', name: 'Problem Statement', description: 'Clear definition of the problem to be solved' },
-                { id: 'project-scope', name: 'Project Scope', description: 'Boundaries of the project and what will/won\'t be addressed' },
-                { id: 'smart-goals', name: 'SMART Goals', description: 'Specific, Measurable, Achievable, Relevant, Time-bound objectives' },
-                { id: 'stakeholder-analysis', name: 'Stakeholder Analysis', description: 'Identify all parties affected by the project' },
-            ],
-            'Measure': [
-                { id: 'data-collection-plan', name: 'Data Collection Plan', description: 'How data will be gathered, by whom, and when' },
-                { id: 'current-metrics', name: 'Current Metrics', description: 'Baseline measurements of the process' },
-                { id: 'process-mapping', name: 'Process Mapping', description: 'Visual representation of the current process' },
-            ],
-            'Analyze': [
-                { id: 'root-cause-analysis', name: 'Root Cause Analysis', description: 'Identification of underlying causes' },
-                { id: 'data-analysis', name: 'Data Analysis', description: 'Statistical analysis of collected data' },
-                { id: 'value-analysis', name: 'Value Analysis', description: 'Identification of value-adding vs. non-value-adding activities' },
-            ],
-            'Improve': [
-                { id: 'solution-options', name: 'Solution Options', description: 'Potential improvements to address root causes' },
-                { id: 'implementation-plan', name: 'Implementation Plan', description: 'How solutions will be rolled out' },
-                { id: 'risk-analysis', name: 'Risk Analysis', description: 'Potential issues and mitigation strategies' },
-            ],
-            'Control': [
-                { id: 'control-plan', name: 'Control Plan', description: 'How improvements will be maintained over time' },
-                { id: 'monitoring-system', name: 'Monitoring System', description: 'Ongoing measurement of key metrics' },
-                { id: 'documentation', name: 'Documentation', description: 'All process changes, training materials, and procedures' },
-                { id: 'handover-plan', name: 'Handover Plan', description: 'Transition of responsibility to process owners' },
-            ]
-        };
+    const [formData, setFormData] = useState({});
+    const [activeTab, setActiveTab] = useState('inputs'); // 'inputs', 'requirements', or 'tools'
+    const [saving, setSaving] = useState(false);
 
-        return requirements[currentStage] || [];
+    useEffect(() => {
+        if (projectData?.dmaicStages) {
+            const currentStageData = projectData.dmaicStages.find(
+                stage => stage.stage_name === currentStage
+            );
+            setFormData(currentStageData?.data || {});
+        }
+    }, [currentStage, projectData]);
+
+    const handleChange = (field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value
+        }));
     };
 
-    return (
-        <div className={`bg-white shadow-lg fixed top-32 bottom-0 right-0 z-10 transition-all duration-300 overflow-y-auto
-      ${isOpen ? 'w-80' : 'w-0'}`}>
-            <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-6">{currentStage} Requirements</h2>
+    const handleSave = async () => {
+        try {
+            setSaving(true);
+            await onSave(formData);
+        } finally {
+            setSaving(false);
+        }
+    };
 
-                <div className="space-y-6">
-                    {/* Phase Description */}
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                            About This Phase
-                        </h3>
-                        <p className="text-gray-600 text-sm">
-                            {currentStage === 'Define' && 'Define the problem, goals, and project scope clearly.'}
-                            {currentStage === 'Measure' && 'Collect baseline data to understand the current state.'}
-                            {currentStage === 'Analyze' && 'Identify root causes and process inefficiencies.'}
-                            {currentStage === 'Improve' && 'Develop and implement solutions to address root causes.'}
-                            {currentStage === 'Control' && 'Establish controls to maintain improvements over time.'}
+    const requirements = getPhaseRequirements(currentStage);
+    const phaseDescription = getPhaseDescription(currentStage);
+    const recommendedTools = getRecommendedTools(currentStage);
+
+    const checkRequirements = () => {
+        const requiredFields = requirements.filter(req => req.required);
+        return requiredFields.every(req => Boolean(formData[req.id]));
+    };
+
+    const renderTabs = () => (
+        <div className="flex border-b mb-4">
+            <button
+                onClick={() => setActiveTab('inputs')}
+                className={`px-4 py-2 -mb-px ${activeTab === 'inputs'
+                    ? 'border-b-2 border-blue-500 text-blue-600 font-medium'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+            >
+                Inputs
+            </button>
+            <button
+                onClick={() => setActiveTab('requirements')}
+                className={`px-4 py-2 -mb-px ${activeTab === 'requirements'
+                    ? 'border-b-2 border-blue-500 text-blue-600 font-medium'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+            >
+                Requirements
+            </button>
+            <button
+                onClick={() => setActiveTab('tools')}
+                className={`px-4 py-2 -mb-px ${activeTab === 'tools'
+                    ? 'border-b-2 border-blue-500 text-blue-600 font-medium'
+                    : 'text-gray-500 hover:text-gray-700'
+                    }`}
+            >
+                Tools
+            </button>
+        </div>
+    );
+
+    const renderRequirements = () => (
+        <div className="space-y-4">
+            <p className="text-sm text-gray-600 mb-6">{phaseDescription}</p>
+
+            {requirements.map((req) => (
+                <div
+                    key={req.id}
+                    className={`flex items-start p-4 rounded-lg ${formData[req.id] ? 'bg-green-50' : 'bg-gray-50'
+                        }`}
+                >
+                    <div className="flex-shrink-0 mt-1">
+                        {formData[req.id] ? (
+                            <FaCheckCircle className="text-green-500" />
+                        ) : (
+                            <FaExclamationCircle className={`${req.required ? 'text-amber-500' : 'text-gray-400'
+                                }`} />
+                        )}
+                    </div>
+                    <div className="ml-3">
+                        <h4 className="text-sm font-medium text-gray-900">
+                            {req.label}
+                            {req.required && <span className="text-red-500">*</span>}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                            {formData[req.id] ? 'Completed' : 'Not yet completed'}
                         </p>
                     </div>
+                </div>
+            ))}
+        </div>
+    );
 
-                    {/* Requirements Checklist */}
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                            Required Outputs
-                        </h3>
-                        <div className="space-y-3">
-                            {getPhaseRequirements().map((req, idx) => (
-                                <div key={idx} className="flex items-start">
-                                    <div className="h-5 w-5 rounded-full border-2 border-gray-300 flex-shrink-0 mt-0.5 mr-3"></div>
-                                    <div>
-                                        <h4 className="text-sm font-medium text-gray-800">{req.name}</h4>
-                                        <p className="text-xs text-gray-500">{req.description}</p>
-                                    </div>
+    const renderTools = () => (
+        <div className="space-y-4">
+            {recommendedTools.map((tool) => (
+                <div
+                    key={tool.id}
+                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h4 className="text-sm font-medium text-gray-900">{tool.name}</h4>
+                            <p className="text-sm text-gray-500">{tool.description}</p>
+                        </div>
+                        <button
+                            onClick={() => onAddTool(tool.id)}
+                            className="ml-4 px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                        >
+                            Add
+                        </button>
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+
+    return (
+        <div className={`fixed top-16 bottom-0 right-0 w-96 bg-white shadow-lg transition-transform duration-300 transform ${isOpen ? 'translate-x-0' : 'translate-x-full'
+            } overflow-y-auto z-10`}>
+            <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold text-gray-800">
+                        {currentStage} Phase
+                    </h2>
+                </div>
+
+                {renderTabs()}
+
+                {activeTab === 'requirements' && renderRequirements()}
+                {activeTab === 'tools' && renderTools()}
+                {activeTab === 'inputs' && (
+                    <div className="space-y-6">
+                        <div className="space-y-6">
+                            {Object.entries(getPhaseRequirements(currentStage)).map(([key, field]) => (
+                                <div key={key}>
+                                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                        {field.label}
+                                        {field.required && <span className="text-red-500">*</span>}
+                                    </label>
+                                    <textarea
+                                        value={formData[key] || ''}
+                                        onChange={(e) => handleChange(key, e.target.value)}
+                                        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 h-32"
+                                        placeholder={`Enter ${field.label.toLowerCase()}...`}
+                                    />
                                 </div>
                             ))}
                         </div>
-                    </div>
 
-                    {/* Recommended Tools */}
-                    <div>
-                        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                            Recommended Tools
-                        </h3>
-                        <div className="grid grid-cols-1 gap-2">
-                            {currentStage === 'Define' && (
-                                <>
-                                    <button onClick={() => handleAddCard('IS_IS_NOT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        IS/IS NOT Analysis
-                                    </button>
-                                    <button onClick={() => handleAddCard('SIPOC')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        SIPOC Diagram
-                                    </button>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Problem Statement Document
-                                    </button>
-                                </>
-                            )}
-                            {currentStage === 'Measure' && (
-                                <>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Data Collection Plan
-                                    </button>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Process Map
-                                    </button>
-                                </>
-                            )}
-                            {currentStage === 'Analyze' && (
-                                <>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Root Cause Analysis
-                                    </button>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        5 Why Analysis
-                                    </button>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Fishbone Diagram
-                                    </button>
-                                </>
-                            )}
-                            {currentStage === 'Improve' && (
-                                <>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Solution Matrix
-                                    </button>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Implementation Plan
-                                    </button>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Pilot Test Results
-                                    </button>
-                                </>
-                            )}
-                            {currentStage === 'Control' && (
-                                <>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Control Plan
-                                    </button>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Standard Operating Procedure
-                                    </button>
-                                    <button onClick={() => handleAddCard('RICH_TEXT')} className="text-left px-3 py-2 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition">
-                                        Training Documentation
-                                    </button>
-                                </>
-                            )}
+                        <div className="pt-6 border-t space-y-4">
+                            <button
+                                onClick={handleSave}
+                                disabled={saving}
+                                className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center"
+                            >
+                                <FaSave className="mr-2" />
+                                {saving ? 'Saving...' : 'Save Progress'}
+                            </button>
+
+                            <button
+                                onClick={onPhaseComplete}
+                                disabled={!checkRequirements()}
+                                className={`w-full py-2 rounded-lg flex items-center justify-center ${checkRequirements()
+                                    ? 'bg-green-500 text-white hover:bg-green-600'
+                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                    }`}
+                            >
+                                Complete Phase
+                                <FaChevronRight className="ml-2" />
+                            </button>
                         </div>
                     </div>
-
-                    {/* Complete Phase Button */}
-                    <div className="pt-6 mt-8 border-t border-gray-200">
-                        <button
-                            onClick={completeCurrentPhase}
-                            disabled={!requirementsComplete}
-                            className={`w-full py-3 px-4 rounded-lg flex items-center justify-center ${requirementsComplete
-                                    ? 'bg-green-600 text-white hover:bg-green-700'
-                                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                }`}
-                        >
-                            <span>Complete & Continue</span>
-                            <FaArrowRight className="ml-2" />
-                        </button>
-                        {!requirementsComplete && (
-                            <p className="mt-2 text-xs text-center text-amber-600">
-                                Add more content to complete this phase
-                            </p>
-                        )}
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

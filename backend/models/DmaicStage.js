@@ -17,10 +17,17 @@ const DmaicStage = sequelize.define('DmaicStage', {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
-    // data se almacena como JSONB
     data: {
         type: DataTypes.JSONB,
         allowNull: true,
+        defaultValue: {
+            // Campos base para cada fase
+            requirements: {},     // Estado de los requisitos
+            inputs: {},          // Datos de entrada de la fase
+            tools: [],          // Herramientas utilizadas
+            attachments: [],    // Referencias a documentos/archivos
+            history: []         // Historial de cambios
+        }
     },
     project_id: {
         type: DataTypes.UUID,

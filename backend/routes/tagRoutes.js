@@ -2,25 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const Tag = require('../models/Tag');
-
-// Middleware para verificar el token
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    if (!authHeader) {
-        return res.status(401).json({ message: 'Falta el token en la cabecera Authorization' });
-    }
-    const token = authHeader.split(' ')[1]; // Se espera el formato: "Bearer <token>"
-    if (!token) {
-        return res.status(401).json({ message: 'Token no proporcionado' });
-    }
-    jwt.verify(token, process.env.JWT_SECRET, (err, userData) => {
-        if (err) {
-            return res.status(403).json({ message: 'Token inválido o expirado' });
-        }
-        req.user = userData;
-        next();
-    });
-}
+const { authenticateToken } = require('../middleware/auth');
 
 // GET /api/tags - Obtener todas las etiquetas disponibles
 router.get('/', authenticateToken, async (req, res) => {

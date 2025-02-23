@@ -8,6 +8,7 @@ const Team = require('./Team');
 const DmaicStage = require('./DmaicStage');
 const RefreshToken = require('./RefreshToken');
 const Tag = require('./Tag');
+const TokenActivity = require('./TokenActivity');
 
 // Definimos las asociaciones
 User.hasMany(Project, { foreignKey: 'owner_id', as: 'projects' });
@@ -31,6 +32,9 @@ RefreshToken.belongsTo(User, { foreignKey: 'userId' });
 Project.belongsToMany(Tag, { through: 'ProjectTags', as: 'tags', onDelete: 'CASCADE' });
 Tag.belongsToMany(Project, { through: 'ProjectTags', as: 'projects', onDelete: 'CASCADE' });
 
+RefreshToken.hasMany(TokenActivity, { foreignKey: 'refreshTokenId' });
+TokenActivity.belongsTo(RefreshToken, { foreignKey: 'refreshTokenId' });
+
 // Conexión a la base de datos
 const connectDB = async () => {
     try {
@@ -41,14 +45,14 @@ const connectDB = async () => {
     }
 };
 
-// Exportamos
 module.exports = {
     sequelize,
-    connectDB,
     User,
     Project,
     Team,
     DmaicStage,
     RefreshToken,
-    Tag
+    Tag,
+    TokenActivity,
+    connectDB
 };
