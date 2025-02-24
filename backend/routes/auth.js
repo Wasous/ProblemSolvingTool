@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { Op } = require('sequelize');
-const { User, RefreshToken } = require('../models');
+const { User, RefreshToken, TokenActivity } = require('../models');
 const {
     generateFingerprint,
     checkForSuspiciousActivity,
@@ -49,6 +49,8 @@ router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        console.log('1. Login attempt for email:', email);
+
         if (!email || !password) {
             return res.status(400).json({ message: 'Se requieren email y password' });
         }
@@ -60,19 +62,45 @@ router.post('/login', async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
 
+        console.log('2. User found:', user.id);
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Contraseña incorrecta' });
         }
 
+        console.log('3. Password validated');
+
+        try {
+            await RefreshToken.update(
+                { isRevoked: true },
+                {
+                    where: {
+                        userId: user.id,
+                        isRevoked: false,
+                        expiresAt: { [Op.gt]: new Date() }
+                    }
+                }
+            );
+            console.log('4. Revoked existing tokens');
+        } catch (error) {
+            console.error('Error revoking existing tokens:', error);
+        }
+
         const accessToken = jwt.sign(
             { email: user.email, userId: user.id },
             process.env.JWT_SECRET,
-            { expiresIn: '15m' }
+            { expiresIn: '1m' }
         );
 
         const tokenFamily = uuidv4();
         const deviceFingerprint = generateFingerprint(req);
+
+        console.log('5. Generated new tokens:', {
+            tokenFamily,
+            deviceFingerprint,
+            userIp: req.ip
+        });
 
         const refreshToken = jwt.sign(
             {
@@ -83,25 +111,45 @@ router.post('/login', async (req, res) => {
             process.env.JWT_REFRESH_SECRET,
             { expiresIn: '7d' }
         );
+        console.log(refreshToken)
 
-        const savedToken = await RefreshToken.create({
-            token: refreshToken,
+        console.log('6. Creating refresh token in database with data:', {
             userId: user.id,
             family: tokenFamily,
-            deviceFingerprint,
-            ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
-            isUsed: false,
-            isRevoked: false,
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            fingerprint: deviceFingerprint,
+            tokenLength: refreshToken.length
         });
 
-        await logSecurityEvent({
-            type: 'login',
-            tokenId: savedToken.id,
-            ipAddress: req.ip,
-            userAgent: req.headers['user-agent']
-        });
+        // Guardar el refresh token en la base de datos
+        try {
+            const savedToken = await RefreshToken.create({
+                token: refreshToken,
+                userId: user.id,
+                family: tokenFamily,
+                deviceFingerprint,
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent'],
+                isUsed: false,
+                isRevoked: false,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
+            });
+
+            console.log('6. Token saved in database:', savedToken.id);
+
+            // Verificar que se guardó correctamente
+            const verifyToken = await RefreshToken.findOne({
+                where: { token: refreshToken }
+            });
+            console.log('7. Token verification:', !!verifyToken);
+
+        } catch (error) {
+            console.error('Error saving refresh token:', error);
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                await revokeTokenFamily(tokenFamily);
+                throw new Error('Token collision detected');
+            }
+            throw error;
+        }
 
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -109,6 +157,7 @@ router.post('/login', async (req, res) => {
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
+
 
         res.status(200).json({
             message: 'Inicio de sesión exitoso',
@@ -126,7 +175,7 @@ router.post('/login', async (req, res) => {
 router.post('/refresh', async (req, res) => {
     const oldRefreshToken = req.cookies.refreshToken;
     const currentFingerprint = generateFingerprint(req);
-
+    console.log('Old token: ' + oldRefreshToken)
     if (!oldRefreshToken) {
         return res.status(401).json({ message: 'No refresh token provided' });
     }
@@ -141,7 +190,7 @@ router.post('/refresh', async (req, res) => {
                 order: [['createdAt', 'DESC']]
             }]
         });
-
+        console.log('stored one: ' + storedToken)
         if (!storedToken) {
             throw new Error('Token not found');
         }
@@ -197,7 +246,7 @@ router.post('/refresh', async (req, res) => {
         const newAccessToken = jwt.sign(
             { email: userData.email, userId: userData.userId },
             process.env.JWT_SECRET,
-            { expiresIn: '15m' }
+            { expiresIn: '1m' }
         );
 
         const newRefreshToken = jwt.sign(
@@ -207,22 +256,30 @@ router.post('/refresh', async (req, res) => {
         );
 
         // Store new refresh token
-        await RefreshToken.create({
-            token: newRefreshToken,
-            userId: userData.userId,
-            family: storedToken.family,
-            deviceFingerprint: currentFingerprint,
-            ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
-            isUsed: false,
-            isRevoked: false,
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-        });
+        try {
+            await RefreshToken.create({
+                token: newRefreshToken,
+                userId: userData.userId,
+                family: storedToken.family,
+                deviceFingerprint: currentFingerprint,
+                ipAddress: req.ip,
+                userAgent: req.headers['user-agent'],
+                isUsed: false,
+                isRevoked: false,
+                expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            });
+        } catch (error) {
+            if (error.name === 'SequelizeUniqueConstraintError') {
+                await revokeTokenFamily(storedToken.family);
+                throw new Error('Token collision detected');
+            }
+            throw error;
+        }
 
         // Set new refresh token cookie
         res.cookie('refreshToken', newRefreshToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'dev',
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000
         });

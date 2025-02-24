@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { logout as apiLogout, refreshToken as apiRefreshToken } from '../services/authService';
 import { jwtDecode } from 'jwt-decode';
 
@@ -20,6 +20,8 @@ export const AuthProvider = ({ children }) => {
         return savedUser ? JSON.parse(savedUser) : null;
     });
     const [loading, setLoading] = useState(true);
+
+    const initialRefreshDone = useRef(false);
 
     const login = (token, userId, userName) => {
         setAccessToken(token);
@@ -59,13 +61,15 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         const initAuth = async () => {
             const token = localStorage.getItem('accessToken');
-            if (token) {
+            if (token && !initialRefreshDone.current) {
                 if (isTokenExpired(token)) {
+                    initialRefreshDone.current = true;
                     await refreshAccessToken();
                 }
             }
             setLoading(false);
         };
+
 
         initAuth();
     }, []);

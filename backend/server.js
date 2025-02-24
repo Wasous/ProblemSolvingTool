@@ -45,6 +45,7 @@ const startServer = async () => {
             allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
             credentials: true,  // Allow credentials (cookies, authorization headers)
             maxAge: 86400,  // Cache preflight request results for 24 hours
+            exposedHeaders: ['set-cookie'],
             preflightContinue: false,  // Pass the preflight response to the next handler
             optionsSuccessStatus: 204,  // Some legacy browsers choke on 204
         };
