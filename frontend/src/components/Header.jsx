@@ -4,15 +4,15 @@ import { useAuth } from '../contexts/AuthContext';
 
 // Menu icons as components
 const MenuIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
   >
     <line x1="4" y1="12" x2="20" y2="12"></line>
@@ -22,15 +22,15 @@ const MenuIcon = () => (
 );
 
 const CloseIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width="24" 
-    height="24" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
     strokeLinejoin="round"
   >
     <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -38,15 +38,13 @@ const CloseIcon = () => (
   </svg>
 );
 
-import DmaicMenu from './DmaicMenu.jsx';
-
-const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
+const Header = ({ title }) => {
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
   const location = useLocation();
   const params = useParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
   // Check if we're on a DMAIC page by either route path or projectId param
   const isDmaicPage = location.pathname.includes('/DMAIC') || params.projectId;
   // Determine if we're looking at a specific project
@@ -66,13 +64,13 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const NavLinks = ({ className = "", onClick = () => {} }) => (
+  const NavLinks = ({ className = "", onClick = () => { } }) => (
     <ul className={`${className}`}>
       {isAuthenticated ? (
         <>
           <li>
-            <Link 
-              to="/main" 
+            <Link
+              to="/main"
               className="block py-2 text-gray-300 hover:text-white transition-colors"
               onClick={onClick}
             >
@@ -80,8 +78,8 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
             </Link>
           </li>
           <li>
-            <Link 
-              to="/projects" 
+            <Link
+              to="/projects"
               className="block py-2 hover:text-gray-200 transition-colors"
               onClick={onClick}
             >
@@ -89,8 +87,8 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
             </Link>
           </li>
           <li>
-            <Link 
-              to="/settings" 
+            <Link
+              to="/settings"
               className="block py-2 hover:text-gray-200 transition-colors"
               onClick={onClick}
             >
@@ -112,8 +110,8 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
       ) : (
         <>
           <li>
-            <Link 
-              to="/login" 
+            <Link
+              to="/login"
               className="block py-2 hover:text-gray-200 transition-colors"
               onClick={onClick}
             >
@@ -121,8 +119,8 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
             </Link>
           </li>
           <li>
-            <Link 
-              to="/register" 
+            <Link
+              to="/register"
               className="block py-2 hover:text-gray-200 transition-colors"
               onClick={onClick}
             >
@@ -160,17 +158,6 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
             )}
           </div>
 
-          {/* DMAIC Menu - Show only on DMAIC pages with stages data */}
-          {isDmaicPage && dmaicStages && dmaicStages.length > 0 && currentStage && setCurrentStage && (
-            <div className="hidden lg:block">
-              <DmaicMenu
-                stages={dmaicStages}
-                currentStage={currentStage}
-                setCurrentStage={setCurrentStage}
-              />
-            </div>
-          )}
-
           {/* Desktop Navigation */}
           <nav className="hidden lg:block">
             <NavLinks className="flex space-x-6 items-center" />
@@ -203,20 +190,9 @@ const Header = ({ title, currentStage, setCurrentStage, dmaicStages }) => {
               </button>
             )}
 
-            {/* Mobile DMAIC Menu */}
-            {isDmaicPage && dmaicStages && dmaicStages.length > 0 && currentStage && setCurrentStage && (
-              <div className="mb-4">
-                <DmaicMenu
-                  stages={dmaicStages}
-                  currentStage={currentStage}
-                  setCurrentStage={setCurrentStage}
-                />
-              </div>
-            )}
-
             {/* Mobile Navigation Links */}
-            <NavLinks 
-              className="space-y-2" 
+            <NavLinks
+              className="space-y-2"
               onClick={() => setIsMenuOpen(false)}
             />
           </div>

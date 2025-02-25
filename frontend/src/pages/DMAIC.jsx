@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButton from '../components/FloatingButton';
@@ -10,7 +9,6 @@ import LeftPanel from '../components/LeftPanel';
 import RightPanel from '../components/RightPanel';
 import DmaicNavigation from '../components/DmaicNavigation';
 import ContentArea from '../components/ContentArea';
-//import { getCurrentPhase, sortDmaicStages } from '../utils/dmaicUtils';
 
 const DMAIC = () => {
   const { projectId } = useParams();
@@ -364,7 +362,12 @@ const DMAIC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Main Header */}
-      <Header title={project?.name || "DMAIC Process"} />
+      <Header
+        title={project?.name || "DMAIC Process"}
+        currentStage={currentStage}
+        setCurrentStage={setCurrentStage}
+        dmaicStages={dmaicStages}
+      />
 
       {/* DMAIC Phase Navigation */}
       <DmaicNavigation
@@ -378,19 +381,11 @@ const DMAIC = () => {
         {/* Left Panel - Project Info */}
         <LeftPanel
           isOpen={leftPanelOpen}
+          setLeftPanelOpen={setLeftPanelOpen}
           project={project}
           isOwner={isOwner}
-          dmaicStages={dmaicStages}
+          currentStage={currentStage}
         />
-
-        {/* Left Panel Toggle Button */}
-        <button
-          className="fixed left-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-r-md p-2 z-20"
-          onClick={() => setLeftPanelOpen(!leftPanelOpen)}
-          aria-label={leftPanelOpen ? "Close project info panel" : "Open project info panel"}
-        >
-          {leftPanelOpen ? <FaChevronLeft /> : <FaChevronRight />}
-        </button>
 
         {/* Main Content Area */}
         <ContentArea
@@ -406,22 +401,14 @@ const DMAIC = () => {
         {/* Right Panel - Phase Requirements */}
         <RightPanel
           isOpen={rightPanelOpen}
+          setRightPanelOpen={setRightPanelOpen}
           currentStage={currentStage}
           projectData={project}
-          onSave={handleSavePhase}         // Add this
+          onSave={handleSavePhase}
           onPhaseComplete={completeCurrentPhase}
-          handleAddCard={handleAddCard}    // Keep your existing prop
-          requirementsComplete={checkRequirementsComplete()}  // Keep your existing prop
+          handleAddCard={handleAddCard}
+          requirementsComplete={checkRequirementsComplete()}
         />
-
-        {/* Right Panel Toggle Button */}
-        <button
-          className="fixed right-0 top-1/2 transform -translate-y-1/2 bg-white shadow-md rounded-l-md p-2 z-20"
-          onClick={() => setRightPanelOpen(!rightPanelOpen)}
-          aria-label={rightPanelOpen ? "Close requirements panel" : "Open requirements panel"}
-        >
-          {rightPanelOpen ? <FaChevronRight /> : <FaChevronLeft />}
-        </button>
       </div>
 
       {/* Floating Action Button */}

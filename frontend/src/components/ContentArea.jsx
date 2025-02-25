@@ -14,8 +14,8 @@ const ContentArea = ({
     rightPanelOpen
 }) => {
     return (
-        <div className={`flex-grow transition-all duration-300 ${leftPanelOpen ? 'ml-80' : 'ml-0'
-            } ${rightPanelOpen ? 'mr-80' : 'mr-0'}`}>
+        <div className={`flex-grow transition-all duration-300 ${leftPanelOpen ? 'ml-80' : 'ml-20'}
+            ${rightPanelOpen ? 'mr-80' : 'mr-20'}`}>
             <main className="p-6">
                 <div className="container mx-auto">
                     <h1 className="text-2xl font-bold text-gray-800 mb-6">
@@ -42,6 +42,12 @@ const ContentArea = ({
                                     className="bg-green-50 text-green-700 px-4 py-2 rounded-md hover:bg-green-100"
                                 >
                                     Add IS/IS NOT Analysis
+                                </button>
+                                <button
+                                    onClick={() => handleAddCard('SIPOC')}
+                                    className="bg-amber-50 text-amber-700 px-4 py-2 rounded-md hover:bg-amber-100"
+                                >
+                                    Add SIPOC Diagram
                                 </button>
                             </div>
                         </div>
