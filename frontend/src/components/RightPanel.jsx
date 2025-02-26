@@ -284,7 +284,7 @@ const RightPanel = ({
     );
 
     return (
-        <div className={`fixed top-16 bottom-0 right-0 transition-all duration-300 bg-white shadow-lg z-10
+        <div className={`fixed top-16 bottom-0 right-0 transition-all duration-300 bg-white shadow-lg z-40
             ${isOpen ? 'w-80' : 'w-20'}`}>
 
             {/* Toggle button */}

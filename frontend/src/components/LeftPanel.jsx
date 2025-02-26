@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FaHome,
     FaInfoCircle,
@@ -17,15 +17,37 @@ import {
 import * as Tabs from '@radix-ui/react-tabs';
 
 const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
+    // Keep track of the active tab, initially null (no tab selected)
     const [activeTab, setActiveTab] = React.useState(null);
+    // State to control when to show the close button
+    const [showCloseButton, setShowCloseButton] = useState(false);
+
+    // Effect to handle the close button appearance after panel animation completes
+    useEffect(() => {
+        let timer;
+        if (isOpen) {
+            // Show the close button after the panel animation completes (300ms)
+            timer = setTimeout(() => {
+                setShowCloseButton(true);
+            }, 300);
+        } else {
+            // Hide the close button immediately when panel starts closing
+            setShowCloseButton(false);
+        }
+
+        return () => clearTimeout(timer);
+    }, [isOpen]);
 
     if (!project) return null;
 
+    // Maintain the original toggle behavior
     const handleTabClick = (tab) => {
         if (activeTab === tab) {
+            // If clicking the active tab, close the panel and deselect the tab
             setIsOpen(false);
             setActiveTab(null);
         } else {
+            // If clicking a different tab, open the panel and select that tab
             setIsOpen(true);
             setActiveTab(tab);
         }
@@ -88,14 +110,9 @@ const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
     ];
 
     return (
-        <div className="fixed top-16 bottom-0 left-0 flex z-10">
+        <div className="fixed top-16 bottom-0 left-0 flex z-40">
             {/* Sidebar Navigation */}
             <div className="w-16 bg-white border-r border-gray-200 flex flex-col items-center py-4 shadow-sm">
-                {/* Project Avatar */}
-                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mb-6">
-                    <span className="text-sm font-bold text-indigo-700">{getInitials(project.name)}</span>
-                </div>
-
                 {/* Navigation Tabs */}
                 <div className="flex flex-col w-full gap-1">
                     {navItems.map(item => (
@@ -103,10 +120,10 @@ const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
                             key={item.id}
                             onClick={() => handleTabClick(item.id)}
                             className={`
-                w-full py-3 flex flex-col items-center justify-center 
-                transition-all duration-200 relative outline-none border-none focus:outline-none focus:ring-0 rounded-none
-                ${activeTab === item.id ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:text-gray-900 bg-transparent hover:bg-transparent focus:bg-transparent'}
-              `}
+                                w-full py-3 flex flex-col items-center justify-center 
+                                transition-all duration-200 relative outline-none border-none focus:outline-none focus:ring-0 rounded-none
+                                ${activeTab === item.id ? 'text-indigo-600 bg-indigo-50' : 'text-gray-500 hover:text-gray-900 bg-transparent hover:bg-transparent focus:bg-transparent'}
+                            `}
                             title={item.label}
                         >
                             <item.icon className="text-lg" />
@@ -121,58 +138,67 @@ const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
 
             {/* Content Panel */}
             <div className={`
-        bg-white border-r border-gray-200 shadow-md 
-        transition-all duration-300 overflow-hidden
-        ${isOpen ? 'w-72' : 'w-0'}
-      `}>
+                bg-white border-r border-gray-200 shadow-md 
+                transition-all duration-150 overflow-hidden
+                ${isOpen ? 'w-72' : 'w-0'}
+            `}>
                 {isOpen && (
                     <>
-                        {/* Close button */}
+                        {/* Close button with transition */}
                         <button
                             onClick={handleClosePanel}
-                            className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100"
+                            className={`
+                                absolute top-3 right-3 text-gray-500 hover:text-gray-700 
+                                p-1 rounded-full hover:bg-gray-100
+                                transition-opacity duration-200
+                                ${showCloseButton ? 'opacity-100' : 'opacity-0'}
+                            `}
                             title="Close panel"
+                            aria-hidden={!showCloseButton}
+                            tabIndex={showCloseButton ? 0 : -1}
                         >
                             <FaChevronLeft size={16} />
                         </button>
 
                         <div className="p-5 h-full overflow-y-auto pt-12">
-                            {/* Tab Content */}
-                            <TabContent
-                                tab={activeTab}
-                                project={project}
-                                currentStage={currentStage}
-                                phaseProgress={phaseProgress}
-                                formatDate={formatDate}
-                            />
+                            {/* Use Radix UI Tabs only when a tab is selected */}
+                            {activeTab && (
+                                <Tabs.Root value={activeTab} defaultValue={activeTab}>
+                                    <Tabs.Content value="home">
+                                        <HomeTabContent />
+                                    </Tabs.Content>
+
+                                    <Tabs.Content value="info">
+                                        <InfoTabContent project={project} formatDate={formatDate} />
+                                    </Tabs.Content>
+
+                                    <Tabs.Content value="phases">
+                                        <PhasesTabContent phaseProgress={phaseProgress} currentStage={currentStage} />
+                                    </Tabs.Content>
+
+                                    <Tabs.Content value="team">
+                                        <TeamTabContent project={project} />
+                                    </Tabs.Content>
+
+                                    <Tabs.Content value="files">
+                                        <FilesTabContent />
+                                    </Tabs.Content>
+
+                                    <Tabs.Content value="tasks">
+                                        <TasksTabContent />
+                                    </Tabs.Content>
+
+                                    <Tabs.Content value="faqs">
+                                        <FAQsTabContent />
+                                    </Tabs.Content>
+                                </Tabs.Root>
+                            )}
                         </div>
                     </>
                 )}
             </div>
         </div>
     );
-};
-
-// Separate component for tab content
-const TabContent = ({ tab, project, currentStage, phaseProgress, formatDate }) => {
-    switch (tab) {
-        case 'home':
-            return <HomeTabContent />;
-        case 'info':
-            return <InfoTabContent project={project} formatDate={formatDate} />;
-        case 'phases':
-            return <PhasesTabContent phaseProgress={phaseProgress} currentStage={currentStage} />;
-        case 'team':
-            return <TeamTabContent project={project} />;
-        case 'files':
-            return <FilesTabContent />;
-        case 'tasks':
-            return <TasksTabContent />;
-        case 'faqs':
-            return <FAQsTabContent />;
-        default:
-            return null;
-    }
 };
 
 // Home Tab Content

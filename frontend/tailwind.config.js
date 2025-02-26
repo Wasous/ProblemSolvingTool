@@ -2,7 +2,7 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,jsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -22,6 +22,15 @@ export default {
         yellowDark: '#e9c46a',
         yellowDarkHover: '#E2B33C'
       },
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
+        }
+      },
+      animation: {
+        'fade-in': 'fade-in 0.2s ease-out'
+      }
     },
   },
   plugins: [],
