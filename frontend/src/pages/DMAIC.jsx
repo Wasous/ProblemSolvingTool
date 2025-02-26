@@ -21,10 +21,9 @@ const DMAIC = () => {
   const [error, setError] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
 
-  // Panel states - we don't need leftPanelOpen state anymore since Radix Collapsible manages its own state
-  // We just need rightPanelOpen for the content area spacing
+  // Panel states
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
-  const [rightPanelOpen, setRightPanelOpen] = useState(true); // Right panel open by default
+  const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   // Current DMAIC stage
   const [currentStage, setCurrentStage] = useState('Define');
@@ -379,23 +378,27 @@ const DMAIC = () => {
       />
 
       <div className="flex flex-grow relative">
-        {/* Left Panel - Now uses Radix UI */}
+        {/* Left Panel */}
         <LeftPanel
           project={project}
           isOwner={isOwner}
           currentStage={currentStage}
+          isOpen={leftPanelOpen}
+          setIsOpen={setLeftPanelOpen}
         />
 
         {/* Main Content Area */}
-        <ContentArea
-          currentStage={currentStage}
-          currentCards={getCardsForStage(currentStage)}
-          handleAddCard={handleAddCard}
-          handleDeleteCard={handleDeleteCard}
-          handleSaveCard={handleSaveCard}
-          leftPanelOpen={leftPanelOpen}
-          rightPanelOpen={rightPanelOpen}
-        />
+        <div className="flex-1 transition-all duration-300">
+          <ContentArea
+            currentStage={currentStage}
+            currentCards={getCardsForStage(currentStage)}
+            handleAddCard={handleAddCard}
+            handleDeleteCard={handleDeleteCard}
+            handleSaveCard={handleSaveCard}
+            leftPanelOpen={leftPanelOpen}
+            rightPanelOpen={rightPanelOpen}
+          />
+        </div>
 
         {/* Right Panel - Phase Requirements */}
         <RightPanel
