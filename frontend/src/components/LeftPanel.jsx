@@ -16,6 +16,8 @@ import {
     FaTasks,
     FaQuestion
 } from 'react-icons/fa';
+import * as Collapsible from '@radix-ui/react-collapsible';
+import * as Tabs from '@radix-ui/react-tabs';
 
 const LeftPanel = ({
     project,
@@ -172,33 +174,57 @@ const LeftPanel = ({
             </h3>
             {/* This is a placeholder. You would replace this with actual team data */}
             <div className="space-y-4">
-                <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                        <span className="font-bold text-blue-700">JD</span>
+                {(project.teamMembers || []).map((member, index) => (
+                    <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                            <span className="font-bold text-blue-700">
+                                {member.User ? getInitials(member.User.username) : 'N/A'}
+                            </span>
+                        </div>
+                        <div>
+                            <h4 className="font-medium text-gray-800">{member.User?.username || 'Unknown User'}</h4>
+                            <p className="text-sm text-gray-500">{member.role || 'Team Member'}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h4 className="font-medium text-gray-800">John Doe</h4>
-                        <p className="text-sm text-gray-500">Project Manager</p>
-                    </div>
-                </div>
-                <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                        <span className="font-bold text-green-700">JS</span>
-                    </div>
-                    <div>
-                        <h4 className="font-medium text-gray-800">Jane Smith</h4>
-                        <p className="text-sm text-gray-500">Process Engineer</p>
-                    </div>
-                </div>
-                <div className="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">
-                        <span className="font-bold text-purple-700">RJ</span>
-                    </div>
-                    <div>
-                        <h4 className="font-medium text-gray-800">Robert Johnson</h4>
-                        <p className="text-sm text-gray-500">Data Analyst</p>
-                    </div>
-                </div>
+                ))}
+                {(!project.teamMembers || project.teamMembers.length === 0) && (
+                    <p className="text-gray-500 italic">No team members assigned</p>
+                )}
+            </div>
+        </div>
+    );
+
+    const FilesTab = () => (
+        <div className="text-gray-600">
+            <p>Project file management will be available here.</p>
+        </div>
+    );
+
+    const TasksTab = () => (
+        <div className="text-gray-600">
+            <p>Project tasks and assignments will be available here.</p>
+        </div>
+    );
+
+    const FAQsTab = () => (
+        <div className="text-gray-600">
+            <p>Common questions and answers about the project will be available here.</p>
+        </div>
+    );
+
+    const HomeTab = () => (
+        <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-lg">
+                <h3 className="font-medium text-blue-800 mb-2">My Feeds</h3>
+                <p className="text-sm text-blue-600">Recent activity from your projects</p>
+            </div>
+            <div className="p-4 bg-purple-50 rounded-lg">
+                <h3 className="font-medium text-purple-800 mb-2">Announcements</h3>
+                <p className="text-sm text-purple-600">Important updates from the team</p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+                <h3 className="font-medium text-gray-800 mb-2">Notes</h3>
+                <p className="text-sm text-gray-600">Your recent notes and reminders</p>
             </div>
         </div>
     );
@@ -212,161 +238,143 @@ const LeftPanel = ({
                     <span className="text-lg font-bold text-white">{getInitials(project.name)}</span>
                 </div>
 
-                {/* Navigation buttons that mimic the reference image */}
-                <div className="flex flex-col items-center space-y-1 w-full">
-                    <button
-                        className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'home' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
-                        onClick={() => handleTabClick('home')}
-                        title="Home"
-                    >
-                        <FaHome className="text-lg mb-1" />
-                        <span className="text-xs">Home</span>
-                    </button>
+                {/* Navigation buttons using Radix Tabs */}
+                <Tabs.Root
+                    value={activeTab || 'home'}
+                    onValueChange={(value) => handleTabClick(value)}
+                    className="flex flex-col items-center space-y-1 w-full"
+                >
+                    <Tabs.List className="flex flex-col w-full">
+                        <Tabs.Trigger
+                            value="home"
+                            className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'home' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
+                            title="Home"
+                        >
+                            <FaHome className="text-lg mb-1" />
+                            <span className="text-xs">Home</span>
+                        </Tabs.Trigger>
 
-                    <button
-                        className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'info' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
-                        onClick={() => handleTabClick('info')}
-                        title="Project Info"
-                    >
-                        <FaInfoCircle className="text-lg mb-1" />
-                        <span className="text-xs">Info</span>
-                    </button>
+                        <Tabs.Trigger
+                            value="info"
+                            className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'info' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
+                            title="Project Info"
+                        >
+                            <FaInfoCircle className="text-lg mb-1" />
+                            <span className="text-xs">Info</span>
+                        </Tabs.Trigger>
 
-                    <button
-                        className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'phases' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
-                        onClick={() => handleTabClick('phases')}
-                        title="Phases"
-                    >
-                        <FaProjectDiagram className="text-lg mb-1" />
-                        <span className="text-xs">Phases</span>
-                    </button>
+                        <Tabs.Trigger
+                            value="phases"
+                            className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'phases' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
+                            title="Phases"
+                        >
+                            <FaProjectDiagram className="text-lg mb-1" />
+                            <span className="text-xs">Phases</span>
+                        </Tabs.Trigger>
 
-                    <button
-                        className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'team' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
-                        onClick={() => handleTabClick('team')}
-                        title="Team"
-                    >
-                        <FaUsers className="text-lg mb-1" />
-                        <span className="text-xs">Team</span>
-                    </button>
+                        <Tabs.Trigger
+                            value="team"
+                            className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'team' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
+                            title="Team"
+                        >
+                            <FaUsers className="text-lg mb-1" />
+                            <span className="text-xs">Team</span>
+                        </Tabs.Trigger>
 
-                    <button
-                        className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'files' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
-                        onClick={() => handleTabClick('files')}
-                        title="Files"
-                    >
-                        <FaFile className="text-lg mb-1" />
-                        <span className="text-xs">Files</span>
-                    </button>
+                        <Tabs.Trigger
+                            value="files"
+                            className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'files' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
+                            title="Files"
+                        >
+                            <FaFile className="text-lg mb-1" />
+                            <span className="text-xs">Files</span>
+                        </Tabs.Trigger>
 
-                    <button
-                        className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'tasks' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
-                        onClick={() => handleTabClick('tasks')}
-                        title="Tasks"
-                    >
-                        <FaTasks className="text-lg mb-1" />
-                        <span className="text-xs">Tasks</span>
-                    </button>
+                        <Tabs.Trigger
+                            value="tasks"
+                            className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'tasks' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
+                            title="Tasks"
+                        >
+                            <FaTasks className="text-lg mb-1" />
+                            <span className="text-xs">Tasks</span>
+                        </Tabs.Trigger>
 
-                    <button
-                        className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'faqs' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
-                        onClick={() => handleTabClick('faqs')}
-                        title="FAQs"
-                    >
-                        <FaQuestion className="text-lg mb-1" />
-                        <span className="text-xs">FAQs</span>
-                    </button>
-                </div>
+                        <Tabs.Trigger
+                            value="faqs"
+                            className={`w-full py-3 flex flex-col items-center justify-center transition-colors ${activeTab === 'faqs' ? 'bg-slate-700 text-white' : 'text-gray-300 hover:text-white hover:bg-slate-700'}`}
+                            title="FAQs"
+                        >
+                            <FaQuestion className="text-lg mb-1" />
+                            <span className="text-xs">FAQs</span>
+                        </Tabs.Trigger>
+                    </Tabs.List>
+                </Tabs.Root>
             </div>
 
-            {/* Sliding panel */}
-            <div
-                className={`bg-white shadow-lg transition-all duration-300 overflow-hidden ${isOpen ? 'w-80 opacity-100' : 'w-0 opacity-0'
-                    }`}
+            {/* Sliding panel using Radix Collapsible */}
+            <Collapsible.Root
+                open={isOpen}
+                onOpenChange={setIsOpen}
+                className={`bg-white shadow-lg transition-all duration-300 overflow-hidden ${isOpen ? 'w-80 opacity-100' : 'w-0 opacity-0'}`}
             >
-                {/* Panel content based on active tab */}
-                {isOpen && (
-                    <div className="p-6 h-full overflow-y-auto">
-                        <h2 className="text-xl font-bold text-gray-800 mb-6">
-                            {activeTab === 'info' && 'Project Information'}
-                            {activeTab === 'phases' && 'DMAIC Phases'}
-                            {activeTab === 'team' && 'Project Team'}
-                            {activeTab === 'home' && 'Dashboard'}
-                            {activeTab === 'files' && 'Project Files'}
-                            {activeTab === 'tasks' && 'Project Tasks'}
-                            {activeTab === 'faqs' && 'FAQs'}
-                        </h2>
+                <Collapsible.Content>
+                    {isOpen && (
+                        <div className="p-6 h-full overflow-y-auto">
+                            <h2 className="text-xl font-bold text-gray-800 mb-6">
+                                {activeTab === 'info' && 'Project Information'}
+                                {activeTab === 'phases' && 'DMAIC Phases'}
+                                {activeTab === 'team' && 'Project Team'}
+                                {activeTab === 'home' && 'Dashboard'}
+                                {activeTab === 'files' && 'Project Files'}
+                                {activeTab === 'tasks' && 'Project Tasks'}
+                                {activeTab === 'faqs' && 'FAQs'}
+                            </h2>
 
-                        {activeTab === 'info' && <InfoTab />}
-                        {activeTab === 'phases' && (
-                            <div>
-                                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
-                                    PHASE PROGRESS
-                                </h3>
-                                <div className="space-y-3">
-                                    {['Define', 'Measure', 'Analyze', 'Improve', 'Control'].map(phase => {
-                                        const isActive = phase === currentStage;
-                                        const isCompleted = phaseProgress[phase]?.completed;
-                                        const status = isCompleted ? 'Completed' : isActive ? 'Currently active' : 'Not started';
+                            {/* Tab Content */}
+                            {activeTab === 'info' && <InfoTab />}
+                            {activeTab === 'phases' && (
+                                <div>
+                                    <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-3">
+                                        PHASE PROGRESS
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {['Define', 'Measure', 'Analyze', 'Improve', 'Control'].map(phase => {
+                                            const isActive = phase === currentStage;
+                                            const isCompleted = phaseProgress[phase]?.completed;
+                                            const status = isCompleted ? 'Completed' : isActive ? 'Currently active' : 'Not started';
 
-                                        return (
-                                            <div
-                                                key={phase}
-                                                className={`p-4 rounded-lg ${isCompleted ? 'bg-green-50' :
+                                            return (
+                                                <div
+                                                    key={phase}
+                                                    className={`p-4 rounded-lg ${isCompleted ? 'bg-green-50' :
                                                         isActive ? 'bg-blue-50' :
                                                             'bg-gray-50'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <h4 className="font-medium text-gray-800">{phase}</h4>
-                                                    {isCompleted && (
-                                                        <FaCheckCircle className="text-green-500 text-lg" />
-                                                    )}
+                                                        }`}
+                                                >
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h4 className="font-medium text-gray-800">{phase}</h4>
+                                                        {isCompleted && (
+                                                            <FaCheckCircle className="text-green-500 text-lg" />
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm text-gray-500">
+                                                        {status}
+                                                    </p>
                                                 </div>
-                                                <p className="text-sm text-gray-500">
-                                                    {status}
-                                                </p>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                        {activeTab === 'team' && <TeamTab />}
-                        {activeTab === 'home' && (
-                            <div className="space-y-4">
-                                <div className="p-4 bg-blue-50 rounded-lg">
-                                    <h3 className="font-medium text-blue-800 mb-2">My Feeds</h3>
-                                    <p className="text-sm text-blue-600">Recent activity from your projects</p>
-                                </div>
-                                <div className="p-4 bg-purple-50 rounded-lg">
-                                    <h3 className="font-medium text-purple-800 mb-2">Announcements</h3>
-                                    <p className="text-sm text-purple-600">Important updates from the team</p>
-                                </div>
-                                <div className="p-4 bg-gray-50 rounded-lg">
-                                    <h3 className="font-medium text-gray-800 mb-2">Notes</h3>
-                                    <p className="text-sm text-gray-600">Your recent notes and reminders</p>
-                                </div>
-                            </div>
-                        )}
-                        {activeTab === 'files' && (
-                            <div className="text-gray-600">
-                                <p>Project file management will be available here.</p>
-                            </div>
-                        )}
-                        {activeTab === 'tasks' && (
-                            <div className="text-gray-600">
-                                <p>Project tasks and assignments will be available here.</p>
-                            </div>
-                        )}
-                        {activeTab === 'faqs' && (
-                            <div className="text-gray-600">
-                                <p>Common questions and answers about the project will be available here.</p>
-                            </div>
-                        )}
-                    </div>
-                )}
-            </div>
+                            )}
+                            {activeTab === 'team' && <TeamTab />}
+                            {activeTab === 'home' && <HomeTab />}
+                            {activeTab === 'files' && <FilesTab />}
+                            {activeTab === 'tasks' && <TasksTab />}
+                            {activeTab === 'faqs' && <FAQsTab />}
+                        </div>
+                    )}
+                </Collapsible.Content>
+            </Collapsible.Root>
         </div>
     );
 };

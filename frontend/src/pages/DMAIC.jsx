@@ -5,7 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButton from '../components/FloatingButton';
 import { useAuth } from '../contexts/AuthContext';
-import LeftPanel from '../components/LeftPanel';
+import LeftPanel from '../components/LeftPanel'; // This is our Radix-enhanced component
 import RightPanel from '../components/RightPanel';
 import DmaicNavigation from '../components/DmaicNavigation';
 import ContentArea from '../components/ContentArea';
@@ -21,7 +21,8 @@ const DMAIC = () => {
   const [error, setError] = useState(null);
   const [isOwner, setIsOwner] = useState(false);
 
-  // Panel states
+  // Panel states - we don't need leftPanelOpen state anymore since Radix Collapsible manages its own state
+  // We just need rightPanelOpen for the content area spacing
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(true); // Right panel open by default
 
@@ -378,10 +379,8 @@ const DMAIC = () => {
       />
 
       <div className="flex flex-grow relative">
-        {/* Left Panel - Project Info */}
+        {/* Left Panel - Now uses Radix UI */}
         <LeftPanel
-          isOpen={leftPanelOpen}
-          setLeftPanelOpen={setLeftPanelOpen}
           project={project}
           isOwner={isOwner}
           currentStage={currentStage}

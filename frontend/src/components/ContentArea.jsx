@@ -14,7 +14,8 @@ const ContentArea = ({
     rightPanelOpen
 }) => {
     return (
-        <div className={`flex-grow transition-all duration-300 ${leftPanelOpen ? 'ml-80' : 'ml-20'}
+        <div className={`flex-grow transition-all duration-300 
+            ${leftPanelOpen ? 'ml-80' : 'ml-20'}
             ${rightPanelOpen ? 'mr-80' : 'mr-20'}`}>
             <main className="p-6">
                 <div className="container mx-auto">
