@@ -5,7 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import FloatingButton from '../components/FloatingButton';
 import { useAuth } from '../contexts/AuthContext';
-import LeftPanel from '../components/LeftPanel'; // This is our Radix-enhanced component
+import LeftPanel from '../components/LeftPanel';
 import RightPanel from '../components/RightPanel';
 import DmaicNavigation from '../components/DmaicNavigation';
 import ContentArea from '../components/ContentArea';
@@ -376,9 +376,10 @@ const DMAIC = () => {
         setCurrentStage={setCurrentStage}
         completionPercentage={getCompletionPercentage()}
         leftPanelOpen={leftPanelOpen}
-        rightPanelOpen={rightPanelOpen} // Add this prop
+        rightPanelOpen={rightPanelOpen}
       />
-      <div className="flex flex-grow relative">
+
+      <div className="flex flex-1 relative overflow-x-hidden">
         {/* Left Panel */}
         <LeftPanel
           project={project}
@@ -389,17 +390,15 @@ const DMAIC = () => {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 transition-all duration-300">
-          <ContentArea
-            currentStage={currentStage}
-            currentCards={getCardsForStage(currentStage)}
-            handleAddCard={handleAddCard}
-            handleDeleteCard={handleDeleteCard}
-            handleSaveCard={handleSaveCard}
-            leftPanelOpen={leftPanelOpen}
-            rightPanelOpen={rightPanelOpen}
-          />
-        </div>
+        <ContentArea
+          currentStage={currentStage}
+          currentCards={getCardsForStage(currentStage)}
+          handleAddCard={handleAddCard}
+          handleDeleteCard={handleDeleteCard}
+          handleSaveCard={handleSaveCard}
+          leftPanelOpen={leftPanelOpen}
+          rightPanelOpen={rightPanelOpen}
+        />
 
         {/* Right Panel - Phase Requirements */}
         <RightPanel

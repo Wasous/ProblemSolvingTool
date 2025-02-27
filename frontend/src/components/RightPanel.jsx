@@ -259,8 +259,8 @@ const RightPanel = ({
                             key={item.id}
                             onClick={() => handleTabClick(item.id)}
                             className={`
-                                group w-full py-3 flex flex-col items-center justify-center
-                                transition-all duration-200 relative outline-none focus:outline-none
+                                group w-full py-3 flex flex-col items-center justify-center outline-none
+                                transition-all duration-200 relative outline-none border-none focus:outline-none focus:ring-0 rounded-none
                                 ${activeTab === item.id
                                     ? 'text-indigo-600 bg-indigo-50'
                                     : 'text-gray-500 hover:text-gray-900 bg-transparent hover:bg-gray-50'}
@@ -268,13 +268,13 @@ const RightPanel = ({
                             aria-label={item.label}
                         >
                             {/* Icon */}
-                            <item.icon className="text-lg" />
+                            <item.icon className="text-xl" />
 
                             {/* Enhanced Tooltip */}
                             <div className="absolute right-full mr-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-50">
                                 {item.label}
                             </div>
-
+                            <span className="text-xs mt-1">{item.label}</span>
                             {/* Active indicator bar */}
                             {activeTab === item.id && (
                                 <div className="absolute right-0 top-0 bottom-0 w-1 bg-indigo-600"></div>

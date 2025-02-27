@@ -126,7 +126,7 @@ const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
                             `}
                             title={item.label}
                         >
-                            <item.icon className="text-lg" />
+                            <item.icon className="text-xl" />
                             <span className="text-xs mt-1">{item.label}</span>
                             {activeTab === item.id && (
                                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-600"></div>
@@ -139,7 +139,7 @@ const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
             {/* Content Panel */}
             <div className={`
                 bg-white border-r border-gray-200 shadow-md 
-                transition-all duration-150 overflow-hidden
+                transition-all duration-300 overflow-hidden
                 ${isOpen ? 'w-72' : 'w-0'}
             `}>
                 {isOpen && (

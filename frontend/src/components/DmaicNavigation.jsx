@@ -7,19 +7,16 @@ const DmaicNavigation = ({
     setCurrentStage,
     completionPercentage,
     leftPanelOpen = false,
-    rightPanelOpen = false // Add rightPanelOpen prop
+    rightPanelOpen = false
 }) => {
     return (
         <div
             className={`
                 sticky top-16 bg-white border-b border-gray-100 shadow-sm z-30
-                transition-all duration-300
-                ${leftPanelOpen ? 'ml-[352px]' : 'ml-0 sm:ml-16'}
+                transition-all duration-300 overflow-x-hidden
+                ${leftPanelOpen ? 'ml-[352px]' : 'ml-16'}
                 ${rightPanelOpen ? 'mr-96' : 'mr-16'}
             `}
-            style={{
-                width: `calc(100% - ${leftPanelOpen ? '352px' : '0px'} - ${rightPanelOpen ? '96px' : '16px'})`,
-            }}
         >
             <div className="max-w-full px-2 sm:px-4 py-3">
                 {/* Progress bar */}
