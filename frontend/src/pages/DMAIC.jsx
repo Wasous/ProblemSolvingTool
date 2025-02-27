@@ -375,8 +375,8 @@ const DMAIC = () => {
         currentStage={currentStage}
         setCurrentStage={setCurrentStage}
         completionPercentage={getCompletionPercentage()}
+        leftPanelOpen={leftPanelOpen} // Add this prop
       />
-
       <div className="flex flex-grow relative">
         {/* Left Panel */}
         <LeftPanel
