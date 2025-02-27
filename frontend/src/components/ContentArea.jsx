@@ -18,7 +18,7 @@ const ContentArea = ({
             h-full p-6 overflow-y-auto
             transition-all duration-300
             ${leftPanelOpen ? 'ml-[352px]' : 'ml-16'}
-            ${rightPanelOpen ? 'mr-80' : 'mr-20'}
+            ${rightPanelOpen ? 'mr-96' : 'mr-16'} // Increased margin to prevent content from being covered
         `}>
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-2xl font-bold text-gray-800 mb-6">

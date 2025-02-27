@@ -1,26 +1,24 @@
 import React from 'react';
 import * as Tabs from '@radix-ui/react-tabs';
-import { FaCheckCircle } from 'react-icons/fa';
 
 const DmaicNavigation = ({
     stages,
     currentStage,
     setCurrentStage,
     completionPercentage,
-    leftPanelOpen = false
+    leftPanelOpen = false,
+    rightPanelOpen = false // Add rightPanelOpen prop
 }) => {
-    // Find the index of the current stage for defaultValue
-    const stageNames = stages.map(stage => stage.name);
-
     return (
         <div
             className={`
-                sticky top-16 w-full bg-white border-b border-gray-100 shadow-sm z-30
-                transition-all duration-150
+                sticky top-16 bg-white border-b border-gray-100 shadow-sm z-30
+                transition-all duration-300
                 ${leftPanelOpen ? 'ml-[352px]' : 'ml-0 sm:ml-16'}
+                ${rightPanelOpen ? 'mr-96' : 'mr-16'}
             `}
             style={{
-                width: leftPanelOpen ? 'calc(100% - 352px)' : 'calc(100% - 0px)',
+                width: `calc(100% - ${leftPanelOpen ? '352px' : '0px'} - ${rightPanelOpen ? '96px' : '16px'})`,
             }}
         >
             <div className="max-w-full px-2 sm:px-4 py-3">
@@ -55,33 +53,24 @@ const DmaicNavigation = ({
                                     value={stage.name}
                                     disabled={!stage.started}
                                     className={`
-                                        relative flex items-center justify-center
-                                        whitespace-nowrap
+                                        relative flex items-center gap-1
+                                        whitespace-nowrap rounded-none
                                         px-2 sm:px-3 py-2 text-xs sm:text-sm font-medium
                                         transition-all duration-200
                                         data-[state=active]:text-indigo-600 data-[state=active]:font-semibold
                                         data-[disabled]:opacity-40 data-[disabled]:cursor-not-allowed
-                                        focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2
-                                        rounded-none
+                                        focus:outline-none
                                         ${!stage.started ? 'text-indigo-400' :
                                             stage.completed ? 'text-indigo-700' : 'text-indigo-500'}
                                     `}
                                 >
-                                    {/* Stage name */}
-                                    <span>{stage.name}</span>
-
-                                    {/* Active indicator - automatically shown by Radix */}
-                                    {stage.name === currentStage && (
-                                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full" />
-                                    )}
-
-                                    {/* Completed indicator - Improved version */}
+                                    {/* Completed indicator as prefix */}
                                     {stage.completed && (
                                         <svg
                                             xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 24 24"
                                             fill="currentColor"
-                                            className="w-4 h-4 text-green-500 flex-shrink-0"
+                                            className="w-3 h-3 text-green-500"
                                         >
                                             <path
                                                 fillRule="evenodd"
@@ -89,6 +78,14 @@ const DmaicNavigation = ({
                                                 clipRule="evenodd"
                                             />
                                         </svg>
+                                    )}
+
+                                    {/* Stage name */}
+                                    <span>{stage.name}</span>
+
+                                    {/* Active indicator */}
+                                    {stage.name === currentStage && (
+                                        <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full" />
                                     )}
                                 </Tabs.Trigger>
                             ))}
