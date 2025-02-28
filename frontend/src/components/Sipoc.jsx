@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { FaTrash } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import CardContainer from './CardContainer';
 
 const SipocCard = ({ data, onSave, onDelete }) => {
-  // Initialize with editionMode from data if available, or false
   const [editionMode, setEditionMode] = useState(data.editionMode || false);
   const [editableData, setEditableData] = useState(data);
   const [originalData, setOriginalData] = useState(data);
@@ -17,7 +17,7 @@ const SipocCard = ({ data, onSave, onDelete }) => {
 
   // Save changes
   const handleSave = () => {
-    // Create updated data with editionMode explicitly set to false
+    // Create a complete data object with editionMode explicitly set to false
     const updatedData = {
       ...editableData,
       editionMode: false
@@ -26,7 +26,10 @@ const SipocCard = ({ data, onSave, onDelete }) => {
     setEditionMode(false);
     setOriginalData(updatedData);
 
-    if (onSave) onSave(updatedData);
+    // Ensure the complete data is passed to the parent component
+    if (onSave) {
+      onSave(updatedData);
+    }
   };
 
   // Cancel edits
@@ -35,82 +38,68 @@ const SipocCard = ({ data, onSave, onDelete }) => {
     setEditionMode(false);
   };
 
-  // Delete card
-  const handleDelete = () => {
-    if (confirm("¿Seguro que quieres eliminar esta herramienta?")) {
-      onDelete(data.id);
-    }
-  };
+  // SIPOC categories
+  const categories = [
+    { label: 'Suppliers', key: 'suppliers', description: 'Who provides inputs to the process?' },
+    { label: 'Inputs', key: 'inputs', description: 'What inputs are required for the process?' },
+    { label: 'Process', key: 'process', description: 'What are the steps in the process?' },
+    { label: 'Outputs', key: 'outputs', description: 'What results from the process?' },
+    { label: 'Customers', key: 'customers', description: 'Who receives the outputs?' }
+  ];
 
   return (
-    <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-screen-lg mx-auto mb-6">
-      {editionMode ? (
-        <input
-          className="text-2xl font-bold text-gray-800 mb-4 w-full p-2 border rounded"
-          value={editableData.title || 'SIPOC'}
-          onChange={(e) => setEditableData({ ...editableData, title: e.target.value })}
-        />
-      ) : (
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">
-          {editableData.title || 'SIPOC'}
-        </h2>
-      )}
-
-      {/* SIPOC Table */}
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr>
-            <th className="bg-gray-100 text-gray-600 p-3 text-left">Category</th>
-            <th className="bg-gray-100 text-gray-600 p-3 text-left">Details</th>
-          </tr>
-        </thead>
-        <tbody>
-          {["Suppliers", "Inputs", "Process", "Outputs", "Customers"].map((category, index) => (
-            <tr key={index} className="border-t border-gray-300">
-              <td className="bg-gray-50 p-3 font-semibold text-gray-700">{category}</td>
-              <td className="p-3">
-                {editionMode ? (
-                  <textarea
-                    className="w-full p-2 border rounded h-16"
-                    value={editableData[category.toLowerCase()] || ''}
-                    onChange={(e) => handleChange(category.toLowerCase(), e.target.value)}
-                  />
-                ) : (
-                  <p className="whitespace-pre-wrap">
-                    {editableData[category.toLowerCase()] || 'No details provided.'}
-                  </p>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Action Buttons */}
-      <div className="mt-4 text-right space-x-4 justify-end display: flex">
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          onClick={() => (editionMode ? handleSave() : setEditionMode(true))}
-        >
-          {editionMode ? 'Save' : 'Edit'}
-        </button>
-        {editionMode && (
-          <button
-            className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
-            onClick={handleCancel}
+    <CardContainer
+      title={editableData.title || 'SIPOC Diagram'}
+      type="SIPOC"
+      editionMode={editionMode}
+      setEditionMode={setEditionMode}
+      onSave={handleSave}
+      onDelete={onDelete}
+      onCancel={handleCancel}
+      createdAt={data.createdAt}
+      updatedAt={data.updatedAt}
+    >
+      <div className="space-y-4">
+        {categories.map((category, index) => (
+          <motion.div
+            key={category.key}
+            layout
+            className="group"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
           >
-            Cancel
-          </button>
-        )}
-        <button
-          onClick={handleDelete}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center"
-        >
-          <FaTrash size={16} className="mr-2" />
-          Delete
-        </button>
+            <div className="flex items-center">
+              <div className="w-8 h-8 flex items-center justify-center bg-amber-100 text-amber-800 font-bold rounded-lg mr-3">
+                {category.label[0]}
+              </div>
+              <h3 className="text-md font-medium text-gray-800">{category.label}</h3>
+            </div>
+
+            {editionMode ? (
+              <div className="mt-2 ml-11">
+                <textarea
+                  value={editableData[category.key] || ''}
+                  onChange={(e) => handleChange(category.key, e.target.value)}
+                  className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500/40 min-h-24 text-gray-700"
+                  placeholder={category.description}
+                />
+              </div>
+            ) : (
+              <div className="mt-2 ml-11 p-3 bg-gray-50 rounded-lg border border-gray-200 group-hover:border-amber-200 transition-colors">
+                {editableData[category.key] ? (
+                  <p className="whitespace-pre-wrap text-gray-700">
+                    {editableData[category.key]}
+                  </p>
+                ) : (
+                  <p className="text-gray-400 italic">No {category.label.toLowerCase()} specified</p>
+                )}
+              </div>
+            )}
+          </motion.div>
+        ))}
       </div>
-    </div>
+    </CardContainer>
   );
 };
 

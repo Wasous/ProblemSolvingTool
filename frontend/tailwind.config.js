@@ -7,15 +7,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#1E3A8A', // Azul principal
-        secondary: '#2563EB', // Azul más claro
-        accent: '#9333EA', // Morado
-        background: '#F3F4F6', // Fondo gris claro
+        primary: '#1E3A8A', // Main blue
+        secondary: '#2563EB', // Lighter blue
+        accent: '#9333EA', // Purple
+        background: '#F3F4F6', // Light gray background
         accentBg: '#669bbc',
-        textPrimary: '#111827', // Texto principal
+        textPrimary: '#111827', // Main text
         textSecondary: '#6B7280',
         textClear: '#6B7280',
-        textWhite: '#ffffff', // Texto gris
+        textWhite: '#ffffff', // White text
         greyBackground: '#c2dfe3',
         greenText: '#588157',
         greenTextHover: '#3a5a40',

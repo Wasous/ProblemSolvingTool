@@ -106,7 +106,9 @@ router.post('/login', async (req, res) => {
             {
                 email: user.email,
                 userId: user.id,
-                family: tokenFamily
+                family: tokenFamily,
+                nonce: uuidv4(),
+                issuedAt: Date.now()
             },
             process.env.JWT_REFRESH_SECRET,
             { expiresIn: '7d' }
@@ -250,7 +252,13 @@ router.post('/refresh', async (req, res) => {
         );
 
         const newRefreshToken = jwt.sign(
-            { email: userData.email, userId: userData.userId, family: storedToken.family },
+            { 
+                email: userData.email, 
+                userId: userData.userId, 
+                family: storedToken.family,
+                nonce: uuidv4(),
+                issuedAt: Date.now()
+            },
             process.env.JWT_REFRESH_SECRET,
             { expiresIn: '7d' }
         );
