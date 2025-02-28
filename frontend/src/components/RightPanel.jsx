@@ -86,7 +86,7 @@ const RightPanel = ({
     // Navigation items
     const navItems = [
         { id: 'inputs', label: 'Inputs', icon: FaClipboardList },
-        { id: 'requirements', label: 'Requirements', icon: FaListAlt },
+        { id: 'requirements', label: 'Reqs', icon: FaListAlt },
         { id: 'tools', label: 'Tools', icon: FaTools }
     ];
 

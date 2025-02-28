@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 
 const IsIsNotCard = ({ data, onSave, onDelete }) => {
-  // Si data.editionMode es true, arrancamos directamente en edición:
+  // Initialize with editionMode from data if available, or false
   const [editionMode, setEditionMode] = useState(data.editionMode || false);
   const [editableData, setEditableData] = useState(data);
   const [originalData, setOriginalData] = useState(data);
 
-  // Actualizar el estado local cuando cambian los inputs
+  // Update local state when form fields change
   const handleChange = (section, key, value) => {
     setEditableData((prevData) => ({
       ...prevData,
@@ -18,20 +18,27 @@ const IsIsNotCard = ({ data, onSave, onDelete }) => {
     }));
   };
 
-  // Guardar
+  // Save changes
   const handleSave = () => {
+    // Create updated data with editionMode explicitly set to false
+    const updatedData = {
+      ...editableData,
+      editionMode: false
+    };
+
     setEditionMode(false);
-    setOriginalData(editableData);
-    if (onSave) onSave(editableData);
+    setOriginalData(updatedData);
+
+    if (onSave) onSave(updatedData);
   };
 
-  // Cancelar
+  // Cancel edits
   const handleCancel = () => {
     setEditableData(originalData);
     setEditionMode(false);
   };
 
-  //Eliminar
+  // Delete card
   const handleDelete = () => {
     if (confirm("¿Seguro que quieres eliminar esta herramienta?")) {
       onDelete(data.id);
@@ -58,15 +65,15 @@ const IsIsNotCard = ({ data, onSave, onDelete }) => {
         {editionMode ? (
           <textarea
             className="w-full p-2 border rounded h-24"
-            value={editableData.problemStatement}
+            value={editableData.problemStatement || ''}
             onChange={(e) => setEditableData({ ...editableData, problemStatement: e.target.value })}
           />
         ) : (
-          <p className="text-gray-600 whitespace-pre-wrap">{editableData.problemStatement}</p>
+          <p className="text-gray-600 whitespace-pre-wrap">{editableData.problemStatement || 'No problem statement provided.'}</p>
         )}
       </div>
 
-      {/* Tabla Editable */}
+      {/* IS/IS NOT Table */}
       <table className="w-full border-collapse border border-gray-300">
         <thead>
           <tr>
@@ -89,22 +96,26 @@ const IsIsNotCard = ({ data, onSave, onDelete }) => {
                 {editionMode ? (
                   <textarea
                     className="w-full p-2 border rounded h-16"
-                    value={editableData.is[category.key]}
+                    value={(editableData.is && editableData.is[category.key]) || ''}
                     onChange={(e) => handleChange('is', category.key, e.target.value)}
                   />
                 ) : (
-                  <p className="whitespace-pre-wrap">{editableData.is[category.key]}</p>
+                  <p className="whitespace-pre-wrap">
+                    {(editableData.is && editableData.is[category.key]) || ''}
+                  </p>
                 )}
               </td>
               <td className="p-3">
                 {editionMode ? (
                   <textarea
                     className="w-full p-2 border rounded h-16"
-                    value={editableData.isNot[category.key]}
+                    value={(editableData.isNot && editableData.isNot[category.key]) || ''}
                     onChange={(e) => handleChange('isNot', category.key, e.target.value)}
                   />
                 ) : (
-                  <p className="whitespace-pre-wrap">{editableData.isNot[category.key]}</p>
+                  <p className="whitespace-pre-wrap">
+                    {(editableData.isNot && editableData.isNot[category.key]) || ''}
+                  </p>
                 )}
               </td>
             </tr>
@@ -112,13 +123,13 @@ const IsIsNotCard = ({ data, onSave, onDelete }) => {
         </tbody>
       </table>
 
-      {/* Botones */}
+      {/* Action Buttons */}
       <div className="mt-4 text-right space-x-4 justify-end display: flex">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           onClick={() => (editionMode ? handleSave() : setEditionMode(true))}
         >
-          {editionMode ? 'Guardar' : 'Editar'}
+          {editionMode ? 'Save' : 'Edit'}
         </button>
         {editionMode && (
           <button
@@ -127,7 +138,6 @@ const IsIsNotCard = ({ data, onSave, onDelete }) => {
           >
             Cancel
           </button>
-
         )}
         <button
           onClick={handleDelete}

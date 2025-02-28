@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { FaTrash } from 'react-icons/fa';
 
 const SipocCard = ({ data, onSave, onDelete }) => {
+  // Initialize with editionMode from data if available, or false
   const [editionMode, setEditionMode] = useState(data.editionMode || false);
   const [editableData, setEditableData] = useState(data);
   const [originalData, setOriginalData] = useState(data);
 
-  // Actualizar el estado local cuando cambian los inputs
+  // Update local state when inputs change
   const handleChange = (key, value) => {
     setEditableData((prevData) => ({
       ...prevData,
@@ -14,20 +15,27 @@ const SipocCard = ({ data, onSave, onDelete }) => {
     }));
   };
 
-  // Guardar
+  // Save changes
   const handleSave = () => {
+    // Create updated data with editionMode explicitly set to false
+    const updatedData = {
+      ...editableData,
+      editionMode: false
+    };
+
     setEditionMode(false);
-    setOriginalData(editableData);
-    if (onSave) onSave(editableData);
+    setOriginalData(updatedData);
+
+    if (onSave) onSave(updatedData);
   };
 
-  // Cancelar
+  // Cancel edits
   const handleCancel = () => {
     setEditableData(originalData);
     setEditionMode(false);
   };
 
-  // Eliminar
+  // Delete card
   const handleDelete = () => {
     if (confirm("¿Seguro que quieres eliminar esta herramienta?")) {
       onDelete(data.id);
@@ -48,7 +56,7 @@ const SipocCard = ({ data, onSave, onDelete }) => {
         </h2>
       )}
 
-      {/* Tabla Editable */}
+      {/* SIPOC Table */}
       <table className="w-full border-collapse border border-gray-300">
         <thead>
           <tr>
@@ -78,20 +86,20 @@ const SipocCard = ({ data, onSave, onDelete }) => {
         </tbody>
       </table>
 
-      {/* Botones */}
+      {/* Action Buttons */}
       <div className="mt-4 text-right space-x-4 justify-end display: flex">
         <button
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
           onClick={() => (editionMode ? handleSave() : setEditionMode(true))}
         >
-          {editionMode ? 'Guardar' : 'Editar'}
+          {editionMode ? 'Save' : 'Edit'}
         </button>
         {editionMode && (
           <button
             className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
             onClick={handleCancel}
           >
-            Cancelar
+            Cancel
           </button>
         )}
         <button
@@ -99,7 +107,7 @@ const SipocCard = ({ data, onSave, onDelete }) => {
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center"
         >
           <FaTrash size={16} className="mr-2" />
-          Eliminar
+          Delete
         </button>
       </div>
     </div>

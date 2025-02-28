@@ -74,7 +74,7 @@ const ContentArea = ({
                                             initialValue={card.data}
                                             onDelete={() => handleDeleteCard(card.id)}
                                             onSave={(newContent) =>
-                                                handleSaveCard(card.id, { ...card.data, content: newContent })
+                                                handleSaveCard(card.id, newContent)
                                             }
                                         />
                                     );

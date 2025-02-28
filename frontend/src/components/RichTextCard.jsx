@@ -31,34 +31,44 @@ const formats = [
 ];
 
 const RichTextCard = ({ initialValue, onDelete, onSave }) => {
+    // Set initial edit mode from initial value
     const [editionMode, setEditionMode] = useState(initialValue.editionMode || false);
     const [content, setContent] = useState(initialValue);
     const [originalContent, setOriginalContent] = useState(initialValue);
 
-    // Manejar cambios (generalizado para cualquier propiedad de content)
+    // Handle changes for any property of content
     const handleChange = (field, value) => {
         setContent((prev) => ({ ...prev, [field]: value }));
     };
 
-    // Editar
+    // Edit mode
     const handleEdit = () => {
-        setOriginalContent(content); // Guardar estado actual
+        setOriginalContent(content); // Save current state
         setEditionMode(true);
     };
 
-    // Guardar
+    // Save changes
     const handleSave = () => {
+        // Create updated data object with editionMode explicitly set to false
+        const updatedContent = {
+            ...content,
+            editionMode: false // Explicitly save editionMode state
+        };
+
         setEditionMode(false);
-        onSave?.(content); // Notificar al padre los cambios
+        setContent(updatedContent);
+
+        // Pass the updated content to parent component for saving
+        onSave?.(updatedContent);
     };
 
-    // Cancelar
+    // Cancel edits
     const handleCancel = () => {
-        setContent(originalContent); // Restaurar valores originales
+        setContent(originalContent); // Restore original values
         setEditionMode(false);
     };
 
-    // Eliminar
+    // Delete card
     const handleDelete = () => {
         if (confirm('¿Seguro que quieres eliminar esta tarjeta?')) {
             onDelete?.();
@@ -67,24 +77,24 @@ const RichTextCard = ({ initialValue, onDelete, onSave }) => {
 
     return (
         <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-screen-lg mx-auto mb-6">
-            {/* Título */}
+            {/* Title */}
             {editionMode ? (
                 <input
                     type="text"
-                    value={content.title}
+                    value={content.title || ""}
                     onChange={(e) => handleChange('title', e.target.value)}
                     className="text-2xl font-bold text-gray-800 mb-4 w-full p-2 border rounded"
-                    placeholder="Escribe el título..."
+                    placeholder="Enter title..."
                 />
             ) : (
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">{content.title}</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">{content.title || "Untitled Document"}</h2>
             )}
 
-            {/* Contenido o Editor */}
+            {/* Content or Editor */}
             {editionMode ? (
                 <ReactQuill
                     theme="snow"
-                    value={content.content}
+                    value={content.content || ""}
                     onChange={(value) => handleChange('content', value)}
                     modules={modules}
                     formats={formats}
@@ -94,12 +104,12 @@ const RichTextCard = ({ initialValue, onDelete, onSave }) => {
                 <div className="mb-4 ql-snow">
                     <div
                         className="ql-editor"
-                        dangerouslySetInnerHTML={{ __html: content.content }}
+                        dangerouslySetInnerHTML={{ __html: content.content || "" }}
                     />
                 </div>
             )}
 
-            {/* Botones */}
+            {/* Buttons */}
             <div className="flex items-center justify-end space-x-3">
                 {editionMode ? (
                     <>
@@ -107,13 +117,13 @@ const RichTextCard = ({ initialValue, onDelete, onSave }) => {
                             onClick={handleCancel}
                             className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
                         >
-                            Cancelar
+                            Cancel
                         </button>
                         <button
                             onClick={handleSave}
                             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
                         >
-                            Guardar
+                            Save
                         </button>
                     </>
                 ) : (
@@ -121,7 +131,7 @@ const RichTextCard = ({ initialValue, onDelete, onSave }) => {
                         onClick={handleEdit}
                         className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
                     >
-                        Editar
+                        Edit
                     </button>
                 )}
                 <button

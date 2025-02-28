@@ -101,23 +101,24 @@ const DMAIC = () => {
   const loadCardsFromStageData = (stages) => {
     stages.forEach(stage => {
       const stageData = stage.data || {};
-      const cardsArray = stageData.cards || [];
+      // Look for tools array in stage data - this is where cards are stored
+      const toolsArray = stageData.tools || [];
 
       switch (stage.stage_name) {
         case 'Define':
-          setDefineCards(cardsArray.length > 0 ? cardsArray : []);
+          setDefineCards(toolsArray.length > 0 ? toolsArray : []);
           break;
         case 'Measure':
-          setMeasureCards(cardsArray.length > 0 ? cardsArray : []);
+          setMeasureCards(toolsArray.length > 0 ? toolsArray : []);
           break;
         case 'Analyze':
-          setAnalyzeCards(cardsArray.length > 0 ? cardsArray : []);
+          setAnalyzeCards(toolsArray.length > 0 ? toolsArray : []);
           break;
         case 'Improve':
-          setImproveCards(cardsArray.length > 0 ? cardsArray : []);
+          setImproveCards(toolsArray.length > 0 ? toolsArray : []);
           break;
         case 'Control':
-          setControlCards(cardsArray.length > 0 ? cardsArray : []);
+          setControlCards(toolsArray.length > 0 ? toolsArray : []);
           break;
         default:
           break;
@@ -128,7 +129,7 @@ const DMAIC = () => {
   const handleSavePhase = async (phaseData) => {
     try {
       const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/projects/dmaic/${projectId}/${currentStage}`,
+        `${import.meta.env.VITE_API_URL}/dmaic/${projectId}/${currentStage}`,
         {
           data: {
             ...phaseData,
@@ -166,17 +167,44 @@ const DMAIC = () => {
   // Save changes to server
   const saveStageData = async (stageName, cards) => {
     try {
-      const stageData = { cards };
-      const completed = false;
+      // Find the current stage data to preserve other properties
+      const currentStage = project.dmaicStages.find(stage => stage.stage_name === stageName);
+      const currentData = currentStage?.data || {};
 
-      await axios.put(
-        `${import.meta.env.VITE_API_URL}/projects/dmaic/${projectId}/${stageName}`,
-        { data: stageData, completed },
+      // Create updated data structure, maintaining existing structure
+      const updatedData = {
+        ...currentData,
+        tools: cards, // Store cards as tools
+        history: [
+          ...(currentData.history || []),
+          {
+            action: 'update_tools',
+            timestamp: new Date().toISOString(),
+            userId: JSON.parse(localStorage.getItem('currentUser'))?.id || project.owner_id
+          }
+        ]
+      };
+
+      // Use the correct API endpoint from dmaicRoutes.js
+      const response = await axios.put(
+        `${import.meta.env.VITE_API_URL}/dmaic/${projectId}/${stageName}`,
+        {
+          data: updatedData,
+          completed: currentStage?.completed || false
+        },
         {
           headers: { 'Authorization': `Bearer ${accessToken}` },
           withCredentials: true,
         }
       );
+
+      // Update local project state
+      setProject(prev => ({
+        ...prev,
+        dmaicStages: prev.dmaicStages.map(stage =>
+          stage.stage_name === stageName ? response.data.dmaicStage : stage
+        )
+      }));
 
       console.log(`${stageName} stage data saved successfully`);
     } catch (error) {
@@ -190,10 +218,20 @@ const DMAIC = () => {
       const currentStageIndex = dmaicStages.findIndex(stage => stage.name === currentStage);
       const nextStage = dmaicStages[currentStageIndex + 1]?.name;
 
+      // Find current stage data to include all tools/cards
+      const currentStageObj = project.dmaicStages.find(stage => stage.stage_name === currentStage);
+      const currentData = currentStageObj?.data || {};
+
+      // Make sure we include the tools/cards in the completion
+      const updatedData = {
+        ...currentData,
+        tools: getCardsForStage(currentStage)
+      };
+
       const response = await axios.put(
-        `${import.meta.env.VITE_API_URL}/projects/dmaic/${projectId}/${currentStage}`,
+        `${import.meta.env.VITE_API_URL}/dmaic/${projectId}/${currentStage}`,
         {
-          data: { cards: getCardsForStage(currentStage) },
+          data: updatedData,
           completed: true
         },
         {
@@ -231,37 +269,41 @@ const DMAIC = () => {
 
   // Add a new card
   const handleAddCard = (type) => {
-    const newId = Date.now();
+    const newId = `${type.toLowerCase()}-${Date.now()}`;
     let newCard;
 
-    if (type === 'IS_IS_NOT') {
+    if (type === 'IS_IS_NOT' || type === 'is-is-not') {
       newCard = {
         id: newId,
         type: 'IS_IS_NOT',
         data: {
-          title: "",
+          title: "IS / IS NOT Analysis",
           problemStatement: "",
           is: { what: "", where: "", when: "", who: "", howMuch: "" },
           isNot: { what: "", where: "", when: "", who: "", howMuch: "" },
           editionMode: true,
         },
+        createdAt: new Date().toISOString(),
+        createdBy: JSON.parse(localStorage.getItem('currentUser'))?.id || project.owner_id
       };
-    } else if (type === 'RICH_TEXT') {
+    } else if (type === 'RICH_TEXT' || type === 'rich-text') {
       newCard = {
         id: newId,
         type: 'RICH_TEXT',
         data: {
-          title: "",
-          content: "<p>Texto nuevo</p>",
+          title: "New Document",
+          content: "<p>Enter your content here...</p>",
           editionMode: true,
         },
+        createdAt: new Date().toISOString(),
+        createdBy: JSON.parse(localStorage.getItem('currentUser'))?.id || project.owner_id
       };
-    } else if (type === 'SIPOC') {
+    } else if (type === 'SIPOC' || type === 'sipoc') {
       newCard = {
         id: newId,
         type: 'SIPOC',
         data: {
-          title: "",
+          title: "SIPOC Diagram",
           suppliers: "",
           inputs: "",
           process: "",
@@ -269,6 +311,8 @@ const DMAIC = () => {
           customers: "",
           editionMode: true,
         },
+        createdAt: new Date().toISOString(),
+        createdBy: JSON.parse(localStorage.getItem('currentUser'))?.id || project.owner_id
       };
     }
 
@@ -312,9 +356,34 @@ const DMAIC = () => {
   // Save card changes
   const handleSaveCard = (id, newData) => {
     const currentCards = getCardsForStage(currentStage);
-    const updatedCards = currentCards.map((card) =>
-      card.id === id ? { ...card, data: newData } : card
-    );
+
+    const updatedCards = currentCards.map((card) => {
+      if (card.id === id) {
+        // If it's a RichTextCard, make sure we preserve the nested structure
+        if (card.type === 'RICH_TEXT') {
+          return {
+            ...card,
+            data: newData,
+            updatedAt: new Date().toISOString(),
+            updatedBy: JSON.parse(localStorage.getItem('currentUser'))?.id || project.owner_id
+          };
+        }
+
+        // For other card types
+        return {
+          ...card,
+          data: {
+            ...newData,
+            editionMode: newData.editionMode !== undefined ? newData.editionMode : false
+          },
+          updatedAt: new Date().toISOString(),
+          updatedBy: JSON.parse(localStorage.getItem('currentUser'))?.id || project.owner_id
+        };
+      }
+
+      return card;
+    });
+
     updateCardsForStage(currentStage, updatedCards);
     saveStageData(currentStage, updatedCards);
   };
