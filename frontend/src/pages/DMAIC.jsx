@@ -23,7 +23,7 @@ const DMAIC = () => {
 
   // Panel states
   const [leftPanelOpen, setLeftPanelOpen] = useState(false);
-  const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
   // Current DMAIC stage
   const [currentStage, setCurrentStage] = useState('Define');

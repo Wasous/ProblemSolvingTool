@@ -23,7 +23,7 @@ const RightPanel = ({
     requirementsComplete
 }) => {
     const [formData, setFormData] = useState({});
-    const [activeTab, setActiveTab] = useState('inputs'); // 'inputs', 'requirements', or 'tools'
+    const [activeTab, setActiveTab] = useState(null); // 'inputs', 'requirements', or 'tools'
     const [saving, setSaving] = useState(false);
     const [showCloseButton, setShowCloseButton] = useState(false);
 

@@ -6,7 +6,7 @@ import Typography from '@tiptap/extension-typography';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import CardContainer from './CardContainer';
 
 // TipTap Toolbar Button Component
@@ -15,8 +15,8 @@ const MenuButton = ({ onClick, isActive = false, disabled = false, children, tit
         onClick={onClick}
         disabled={disabled}
         className={`p-2 rounded-md transition-colors ${isActive
-                ? 'bg-emerald-100 text-emerald-600'
-                : 'text-gray-600 hover:bg-gray-100'
+            ? 'bg-emerald-100 text-emerald-600'
+            : 'text-gray-600 hover:bg-gray-100'
             } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
         title={title}
     >
@@ -29,7 +29,13 @@ const EditorMenu = ({ editor }) => {
     if (!editor) return null;
 
     return (
-        <div className="border border-gray-200 rounded-t-lg bg-gray-50 p-1 flex flex-wrap gap-1 sticky top-0">
+        <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="border border-gray-200 rounded-t-lg bg-gray-50 p-1 flex flex-wrap gap-1 sticky top-0 z-10"
+        >
             <MenuButton
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 isActive={editor.isActive('bold')}
@@ -170,7 +176,7 @@ const EditorMenu = ({ editor }) => {
             >
                 <span>↪</span>
             </MenuButton>
-        </div>
+        </motion.div>
     );
 };
 
@@ -415,55 +421,68 @@ const RichTextCard = ({ initialValue, onDelete, onSave }) => {
             createdAt={initialValue.createdAt}
             updatedAt={initialValue.updatedAt}
         >
-            {editionMode ? (
-                <motion.div
-                    layout
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                >
-                    <div className="mb-4">
-                        <input
-                            type="text"
-                            value={content.title || ''}
-                            onChange={(e) => handleTitleChange(e.target.value)}
-                            className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-gray-700 font-medium"
-                            placeholder="Document title..."
-                        />
-                    </div>
+            <AnimatePresence mode="wait" initial={false}>
+                {editionMode ? (
+                    <motion.div
+                        key="edit-mode"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                    >
+                        <div className="mb-4">
+                            <input
+                                type="text"
+                                value={content.title || ''}
+                                onChange={(e) => handleTitleChange(e.target.value)}
+                                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-gray-700 font-medium"
+                                placeholder="Document title..."
+                            />
+                        </div>
 
-                    <div className="mb-4 rounded-lg overflow-hidden">
-                        <EditorMenu editor={editor} />
-                        <EditorContent editor={editor} />
-                    </div>
+                        <div className="mb-4 rounded-lg overflow-hidden">
+                            <EditorMenu editor={editor} />
+                            <EditorContent editor={editor} className="transition-all duration-300" />
+                        </div>
 
-                    <div className="mt-2 text-right text-xs text-gray-500">
-                        ~{getWordCount()} words
-                    </div>
-                </motion.div>
-            ) : (
-                <motion.div
-                    layout
-                    className="rich-text-display"
-                >
-                    {/* Apply both Tailwind prose and our custom ProseMirror-content styles */}
-                    <div
-                        className="ProseMirror-content prose prose-slate max-w-none"
-                        dangerouslySetInnerHTML={{ __html: content.content || '<p>No content</p>' }}
-                    />
-
-                    <div className="mt-4 flex justify-between text-xs text-gray-500 border-t border-gray-100 pt-2">
-                        <div>
+                        <div className="mt-2 text-right text-xs text-gray-500">
                             ~{getWordCount()} words
                         </div>
-                        <button
-                            onClick={handleEdit}
-                            className="text-emerald-600 hover:text-emerald-700 font-medium"
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="view-mode"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="rich-text-display"
+                    >
+                        {/* Apply both Tailwind prose and our custom ProseMirror-content styles */}
+                        <div
+                            className="ProseMirror-content prose prose-slate max-w-none"
+                            dangerouslySetInnerHTML={{ __html: content.content || '<p>No content</p>' }}
+                        />
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2, duration: 0.3 }}
+                            className="mt-4 flex justify-between text-xs text-gray-500 border-t border-gray-100 pt-2"
                         >
-                            Edit document
-                        </button>
-                    </div>
-                </motion.div>
-            )}
+                            <div>
+                                ~{getWordCount()} words
+                            </div>
+                            <button
+                                onClick={handleEdit}
+                                className="text-emerald-600 hover:text-emerald-700 font-medium"
+                            >
+                                Edit document
+                            </button>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </CardContainer>
     );
 };
