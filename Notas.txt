@@ -8,3 +8,6 @@ Revisar Header de DMAIC para que no ocupe tanto el menu de navegación DMAIC.
 
 
 https://rosencharts.com/ for react charts.
+
+Paleta color
+bed7d1,f2cd78,bf9e71,d88760,bc6446
