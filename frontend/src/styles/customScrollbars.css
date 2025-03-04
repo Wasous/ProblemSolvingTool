@@ -62,3 +62,24 @@
 .horizontal-scroll::-webkit-scrollbar {
     height: 4px;
 }
+
+/* Prevent scrollbar flicker during transitions */
+.transitioning-card {
+    overflow: clip !important;
+    /* Modern browsers */
+    overflow: hidden !important;
+    /* Fallback for older browsers */
+}
+
+/* Reserve space for scrollbar to prevent layout shift */
+.scrollbar-stable {
+    scrollbar-gutter: stable;
+}
+
+/* Apply to all animated containers */
+.animate-height {
+    transition-property: height, max-height;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+    overflow: hidden;
+}
