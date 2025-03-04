@@ -1,0 +1,429 @@
+[33mcommit bdb1c185c2c38715d11534cb9c76790a546182d3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Tue Mar 4 19:51:38 2025 +0100
+
+    Added different tools
+
+[33mcommit d3f8679e3d1ecb378ba6f5d4d8146c5bba90d9a8[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Mar 2 20:28:53 2025 +0100
+
+    Creating Stakeholder matrix and fishbone
+
+[33mcommit 1bb9b5a7917342ecb5c9d7f916698241d8867bed[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Mar 2 11:12:55 2025 +0100
+
+    Improved small visual and functional things in DMAIC
+
+[33mcommit 7b5956542d3236c8bf536aae817752a8e6cc13b1[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sat Mar 1 00:02:10 2025 +0100
+
+    Floating button modified, icons alone too small, it needs text
+
+[33mcommit 2eb1e9860a8cf9a49768a00e31bbf05ec9c316c1[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Fri Feb 28 23:39:02 2025 +0100
+
+    Updated cards view
+
+[33mcommit e9e6f13dfe11f24a58fbdc54834f64b8cebb7921[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Fri Feb 28 21:56:49 2025 +0100
+
+    now the tools are saving the editstatus and content in the database
+
+[33mcommit f32e8894ee52630750d59809cb45c5f7e4ee0b97[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Fri Feb 28 20:40:24 2025 +0100
+
+    updated notes
+
+[33mcommit 5e2ea55ea71136ce09adebcd2394925c50063093[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Thu Feb 27 21:28:48 2025 +0100
+
+    right panel improved and dmaicnavigation now adapts to the panels
+
+[33mcommit 7e86cd071365f3c9413b5d5c680b552322cad3bf[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Thu Feb 27 21:06:10 2025 +0100
+
+    updated content area and right panel components
+
+[33mcommit 090d7ffdbd6390acce8ee88ffa31219733b50641[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Thu Feb 27 08:23:49 2025 +0100
+
+    improved dmaicnavigation
+
+[33mcommit ba296f5619a6fca5469eb65750e2fed68fbfa4fa[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Wed Feb 26 23:28:11 2025 +0100
+
+    Improved left panel and dmaicnavigation
+
+[33mcommit a5981424a2528c68215b1e6417a49ccaa3bd591e[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Wed Feb 26 20:57:24 2025 +0100
+
+    improved left panel, keep working on it...
+
+[33mcommit a25c807ee100f2f1613eae6be6cadd124053b359[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Wed Feb 26 19:25:08 2025 +0100
+
+    working on left panel
+
+[33mcommit 81fa0e65231539925f3dbd91be0e90fbc8abe75d[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Tue Feb 25 23:21:53 2025 +0100
+
+    Working in the left panel
+
+[33mcommit c5f94becf7ed657aacc09e00d2be061837ef2623[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Mon Feb 24 09:09:40 2025 +0100
+
+    RefreshToken working with extra security
+
+[33mcommit 77321a076bdac942d30bca8b50135128d0b4c9dc[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Feb 23 12:07:10 2025 +0100
+
+    important changes in tokens, database and authentification. Review refresh tokens as every 15 min the app ask you to loggin again
+
+[33mcommit 708fbeec3f5cc387bec8c8ac17c94b3fbbdf41b5[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Fri Feb 21 22:03:03 2025 +0100
+
+    improved user api to not include personal information or passwords
+
+[33mcommit 4396a47e9f2965299ef07920bf1736752784f91f[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Fri Feb 21 20:32:36 2025 +0100
+
+    Improved current phase methods and unified in the utils folder
+
+[33mcommit 68077ba2c828623148080d33bebdf4c687c034c1[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Wed Feb 19 22:47:53 2025 +0100
+
+    Add files to ProblemSolvingTool splitted DMAIC pannels and navigation in different components
+
+[33mcommit 9024849290046886fb1deaddae447128358e7455[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Wed Feb 19 21:26:35 2025 +0100
+
+    improved DMAIC page
+
+[33mcommit 401b6178e0aa758ae2e63505f29569ae22d79139[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Tue Feb 18 22:34:00 2025 +0100
+
+    header improved with mobile menu, review colors, I dont like them
+
+[33mcommit c1b328a525ca7abc53f80de9aec28b04746bcea5[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Mon Feb 17 23:13:36 2025 +0100
+
+    Mejorado el listado de proyectos, con filtros, vista KANBAN, etc. y la tarjeta de proyecto.
+
+[33mcommit b0b938fd2131e2894839001ecacee9d63f07359b[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Mon Feb 17 09:16:16 2025 +0100
+
+    tags ya funcionan y CASCADE Delete
+
+[33mcommit 833df77b8dd82395ccbab479e9d495632641e892[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Mon Feb 17 09:15:32 2025 +0100
+
+    tags ya funcionan
+
+[33mcommit 905ddee121718ab097fda3d1d4c13c118e41c0d8[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Feb 16 21:50:03 2025 +0100
+
+    ah
+
+[33mcommit c9be4982be2d5d227b7237f17092e4079ff2b80a[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Feb 16 21:34:34 2025 +0100
+
+    modified creation form, UI UX improved, more fields in the Project table
+
+[33mcommit f7adccbcb834e1b020a0ff2ff9c91f63f5bbf67a[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Feb 16 20:00:59 2025 +0100
+
+    created tags
+
+[33mcommit 6da7bc799b3b5fbf92597e8430c6bc689294de0b[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Feb 16 10:40:39 2025 +0100
+
+    Retriving projects working, we need to improve the projects cards)
+
+[33mcommit a45ca61d766d150b5623253375c3c2066226635b[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Thu Feb 13 21:01:18 2025 +0100
+
+    project creation is working
+
+[33mcommit 42731e47f3b22595338025b82f5d173209d23132[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Wed Feb 12 23:17:23 2025 +0100
+
+    changed fetch for axios in create form, now we need to make sure the endpoints are working
+
+[33mcommit b1813205af0d5f2dd07bae76343bb20499bb6ac8[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Tue Feb 11 23:51:43 2025 +0100
+
+    search is working with database and by default the leader is the current user, the person who creates the project. Also improved that now we have the username and userid of the currentUser in the localstorage.
+
+[33mcommit 299bb5188829028e8bacd7b1d0540cf26b1b9061[m
+Author: Sancho <hector.sancho@zimvie.com>
+Date:   Mon Feb 10 18:41:35 2025 +0100
+
+    Auth context now works well, refresh token storen in cookieHtml and access token storen in localstorage
+
+[33mcommit 46505998270c166d55d8a14e5534c9492dfc64c0[m
+Author: Sancho <hector.sancho@zimvie.com>
+Date:   Mon Feb 10 17:12:57 2025 +0100
+
+    ah
+
+[33mcommit 936bff81fc1accfbcf320b5285f7a55237e457d4[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Feb 9 23:46:12 2025 +0100
+
+    estamos creando los endpoints para mostrar usuarios al crear proyecto.Creado el user.js en Routes
+
+[33mcommit 2f01124e0b4950f9a09e2f1f258572c476f20bdb[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Wed Feb 5 23:28:24 2025 +0100
+
+    Created db.js dmaistages.js project.js team.js projectroutes.js
+
+[33mcommit e4d808b4d94f276d8bfee019f5b1efb1d8d3522b[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Tue Feb 4 22:57:21 2025 +0100
+
+    readme created
+
+[33mcommit 66b4ebdd65cf4648d44285a1c1d323ce4aaf76a5[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Feb 2 23:21:03 2025 +0100
+
+    Register and login from frontend and conection to backend completed
+
+[33mcommit 81bd5db03ff169665f8a99daa42d2fb3fd4cd22a[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Sun Feb 2 16:37:42 2025 +0100
+
+    auth working with DB and tokens included in the DB too
+
+[33mcommit 6e117017a4a70563799ba38a6b54b483a7283352[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Sun Feb 2 10:24:17 2025 +0100
+
+    Refactorización del arranque del servidor:
+    
+    Se eliminó la llamada duplicada a connectDB() en server.js.
+    Se creó una función asíncrona startServer() que se encarga de conectar a la base de datos, sincronizar todos los modelos con sequelize.sync() y, finalmente, iniciar el servidor.
+    Gestión de Refresh Tokens:
+    
+    Se creó un nuevo modelo en models/RefreshToken.js con los campos:
+    token (STRING, requerido)
+    userId (INTEGER, requerido)
+    deviceInfo (STRING, opcional)
+    expiresAt (DATE, requerido)
+    En auth.js, se actualizó el endpoint de login para almacenar el refresh token en la base de datos (en lugar de mantenerlo en memoria), permitiendo así gestionar múltiples sesiones en diferentes dispositivos.
+    Se dejaron las operaciones sobre access tokens intactas, recordando que éstos no se almacenan por su corta expiración (15 minutos).
+    Mejoras en la estructura y seguridad:
+    
+    Se han reforzado las validaciones y el manejo de errores en los endpoints de autenticación (registro, login, refresh y logout).
+    Se separó la gestión de refresh tokens de la lógica del usuario, facilitando la escalabilidad y administración de sesiones por dispositivo.
+
+[33mcommit efbd38d4270f09eb84899a909303d8cf2a241d58[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Jan 26 22:10:53 2025 +0100
+
+    creado user.js y index.js, creado .env pero no en git, instalado postgress y falta crear la base de datos
+
+[33mcommit 1d277f547b6a8d6639d479d4d3f3a66a0f33a516[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Sun Jan 26 20:12:56 2025 +0100
+
+    backend started
+
+[33mcommit 1ca4cb1d33920ac786f94e58d3b1e07a33befb73[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Sat Jan 25 18:58:44 2025 +0100
+
+    creada carpeta backend y frontend
+
+[33mcommit 9dadbf7fd512710678451c9af683bfd0371f8c01[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Fri Jan 24 15:45:34 2025 +0100
+
+    created the sipoc page
+
+[33mcommit 7eeaec0b9a771f6874145b5bc5b0bcfcdfe7e849[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Mon Jan 20 23:28:28 2025 +0100
+
+    delete modified to work with stages
+
+[33mcommit e9c88fb3e99ddf72cca1df703c60928a87419631[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Mon Jan 20 23:23:12 2025 +0100
+
+    stages navigation and cards creation in the different stages
+
+[33mcommit 3c76fb01757e93ec826eb1eee6883450bcc9ae55[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Jan 19 23:49:10 2025 +0100
+
+    rendering different cards in the same array
+
+[33mcommit 3e6a1e6e3a2c93b412cc532cbbf9a233bc3badcb[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Sun Jan 19 22:02:44 2025 +0100
+
+    + button fixed
+
+[33mcommit 64a93416ec94d7f227539da6700f7c0612a6cc0c[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sat Jan 18 23:32:35 2025 +0100
+
+    Created text editor card
+
+[33mcommit 9b059f62165d6b70aee7168a66ffba0b862a0449[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Fri Jan 17 21:48:14 2025 +0100
+
+    button to add and delete is is not
+
+[33mcommit ee7eee213a85112e9168edc4c7c433cad528a8f5[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Mon Jan 13 21:54:44 2025 +0100
+
+    editable is isnot
+
+[33mcommit 0376ece58fa81f09410aa0b357bc897d7a9c0847[m
+Author: Sancho <hector.sancho@zimvie.com>
+Date:   Mon Jan 13 16:32:54 2025 +0100
+
+    created is isnot card
+
+[33mcommit 2c09e02258e4d79daec14eba3395348b4d76d88f[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Sun Jan 12 22:18:00 2025 +0100
+
+    Created dmaic nav breadcrumb
+
+[33mcommit 1c6c1ac562b908d702d472bf888aca0763209905[m
+Author: Sancho <hector.sancho@zimvie.com>
+Date:   Fri Jan 10 13:28:04 2025 +0100
+
+    created dmaicnav
+
+[33mcommit d040915732c16ed6962c9dfdafd7b8620b1767c0[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Thu Jan 9 23:04:00 2025 +0100
+
+    Created DMAIC page
+
+[33mcommit 097d0c25ec028476eccd509498131880bae00fd9[m
+Author: Sancho <hector.sancho@zimvie.com>
+Date:   Thu Jan 9 21:10:38 2025 +0100
+
+    new proyect dissapears when it should
+
+[33mcommit 35461eea0ff56bc5562be7816a04cc23da9cda20[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Wed Jan 8 23:08:54 2025 +0100
+
+    dynamic header depending on authentification
+
+[33mcommit 447d5476ad0b8b1ddb3fad41069d147e0ef87399[m
+Author: Sancho <hector.sancho@zimvie.com>
+Date:   Wed Jan 8 17:05:30 2025 +0100
+
+    aún cambiando headers...
+
+[33mcommit 5efbaef38b4859b3945b61965e8b1f1792865e41[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Mon Jan 6 23:05:45 2025 +0100
+
+    header adjustments
+
+[33mcommit 6c9c33b1e6850fe2a8cf0372a7d99934b7b2c10c[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Mon Jan 6 21:10:29 2025 +0100
+
+    authentification state created with AuthContext
+
+[33mcommit 22ddd2b6afbdd8ed3524a59232fdd8754f936373[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Mon Jan 6 12:10:23 2025 +0100
+
+    CreatePage updated with moving createform to a component
+
+[33mcommit d598da6e063d1a557f4a6e08a266677060127635[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Mon Jan 6 10:15:58 2025 +0100
+
+    added header project
+
+[33mcommit a2876409896431c8517122d14a5fcf726ec13a33[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Wed Jan 1 23:03:19 2025 +0100
+
+    modified login page and added createpage
+
+[33mcommit 4117ab1938b9622c539cd30dccc14085ce0f7852[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Thu Dec 26 17:24:21 2024 +0100
+
+    Created card for projects
+
+[33mcommit 6551719891636546ac7567c5a68ae8d422f40505[m[33m ([m[1;31morigin/landing_page[m[33m, [m[1;32mlanding_page[m[33m)[m
+Author: Localuser <Localuser@USAZR-G4C5R34.CorpDSB.com>
+Date:   Wed Dec 25 23:08:40 2024 +0100
+
+    Creada página de projects
+
+[33mcommit 8e0fd2ac5fc88ab9901e4bd2bb8db403e82e98a0[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Mon Dec 23 21:52:39 2024 +0100
+
+    Login and register pages created
+
+[33mcommit 94a91dadd929429892e2feba2458174ebc18d668[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Mon Dec 23 20:40:25 2024 +0100
+
+    Login and register pages created
+
+[33mcommit b3f5924edd81737a54adb5865327edcb9a722e27[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Mon Dec 23 11:07:18 2024 +0100
+
+    Landing Page created, layout problem solved
+
+[33mcommit a75e106b8a1e990002fb3cf809b92d73370d4237[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Sun Dec 22 12:20:22 2024 +0100
+
+    Landing Page created, css layour problem
+
+[33mcommit fcdfa0d9fa88a6f3632050f058d579a9e5f3dca9[m
+Author: Hector Sancho <hschilet@gmail.com>
+Date:   Sat Dec 21 22:00:50 2024 +0100
+
+    Initial commit with project setup
