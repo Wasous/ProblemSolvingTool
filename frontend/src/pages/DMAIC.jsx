@@ -7,8 +7,8 @@ import FloatingButton from '../components/FloatingButton';
 import { useAuth } from '../contexts/AuthContext';
 import LeftPanel from '../components/LeftPanel';
 import RightPanel from '../components/RightPanel';
-import DmaicNavigation from '../components/DmaicNavigation';
 import ContentArea from '../components/ContentArea';
+import '../styles/customScrollbars.css';
 
 const DMAIC = () => {
   const { projectId } = useParams();
@@ -35,6 +35,9 @@ const DMAIC = () => {
   const [analyzeCards, setAnalyzeCards] = useState([]);
   const [improveCards, setImproveCards] = useState([]);
   const [controlCards, setControlCards] = useState([]);
+
+  // For scrolling to a specific card
+  const [selectedCardId, setSelectedCardId] = useState(null);
 
   // Load project data
   useEffect(() => {
@@ -124,6 +127,19 @@ const DMAIC = () => {
           break;
       }
     });
+  };
+
+  // Handle card selection from table of contents
+  const handleCardSelect = (cardId) => {
+    setSelectedCardId(cardId);
+    // Find the card to determine which phase it belongs to
+    for (const stageName of ['Define', 'Measure', 'Analyze', 'Improve', 'Control']) {
+      const cards = getCardsForStage(stageName);
+      if (cards.some(card => card.id === cardId)) {
+        setCurrentStage(stageName);
+        break;
+      }
+    }
   };
 
   const handleSavePhase = async (phaseData) => {
@@ -319,6 +335,9 @@ const DMAIC = () => {
     const updatedCards = getCardsForStage(currentStage).concat(newCard);
     updateCardsForStage(currentStage, updatedCards);
     saveStageData(currentStage, updatedCards);
+
+    // Set the newly created card as selected to scroll to it
+    setSelectedCardId(newId);
   };
 
   // Get cards for current stage
@@ -431,24 +450,10 @@ const DMAIC = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Main Header */}
-      <Header
-        title={project?.name || "DMAIC Process"}
-        currentStage={currentStage}
-        setCurrentStage={setCurrentStage}
-        dmaicStages={dmaicStages}
-      />
+      <Header title={project?.name || "DMAIC Process"} />
 
-      {/* DMAIC Phase Navigation */}
-      <DmaicNavigation
-        stages={dmaicStages}
-        currentStage={currentStage}
-        setCurrentStage={setCurrentStage}
-        completionPercentage={getCompletionPercentage()}
-        leftPanelOpen={leftPanelOpen}
-        rightPanelOpen={rightPanelOpen}
-      />
-
-      <div className="flex flex-1 relative overflow-x-hidden">
+      {/* Main Content Area with Sidebars */}
+      <div className="flex-1 pt-16 flex relative overflow-x-hidden">
         {/* Left Panel */}
         <LeftPanel
           project={project}
@@ -456,6 +461,8 @@ const DMAIC = () => {
           currentStage={currentStage}
           isOpen={leftPanelOpen}
           setIsOpen={setLeftPanelOpen}
+          currentCards={getCardsForStage(currentStage)}
+          onCardSelect={handleCardSelect}
         />
 
         {/* Main Content Area */}
@@ -467,13 +474,17 @@ const DMAIC = () => {
           handleSaveCard={handleSaveCard}
           leftPanelOpen={leftPanelOpen}
           rightPanelOpen={rightPanelOpen}
+          scrollToCardId={selectedCardId}
         />
 
-        {/* Right Panel - Phase Requirements */}
+        {/* Right Panel with DMAIC Navigation + Requirements */}
         <RightPanel
           isOpen={rightPanelOpen}
           setRightPanelOpen={setRightPanelOpen}
           currentStage={currentStage}
+          setCurrentStage={setCurrentStage}
+          stages={dmaicStages}
+          completionPercentage={getCompletionPercentage()}
           projectData={project}
           onSave={handleSavePhase}
           onPhaseComplete={completeCurrentPhase}

@@ -1,5 +1,5 @@
-import React from 'react';
-import { HiOutlineDocumentText } from 'react-icons/hi';
+import React, { useState, useEffect } from 'react';
+import { HiOutlineDocumentText, HiViewGrid, HiViewList } from 'react-icons/hi';
 import IsIsNotCard from './IsIsNot';
 import RichTextCard from './RichTextCard';
 import SipocCard from './Sipoc';
@@ -11,8 +11,54 @@ const ContentArea = ({
     handleDeleteCard,
     handleSaveCard,
     leftPanelOpen,
-    rightPanelOpen
+    rightPanelOpen,
+    scrollToCardId,  // New prop for scroll-to functionality
 }) => {
+    // New state for view mode (grid or list)
+    const [viewMode, setViewMode] = useState('grid');
+    // State to track expanded/collapsed cards
+    const [expandedCards, setExpandedCards] = useState({});
+
+    // Reference for scrolling to a specific card
+    const cardRefs = React.useRef({});
+
+    // Handle scrolling to a specific card when scrollToCardId changes
+    useEffect(() => {
+        if (scrollToCardId && cardRefs.current[scrollToCardId]) {
+            cardRefs.current[scrollToCardId].scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }, [scrollToCardId]);
+
+    // Register card ref
+    const registerCardRef = (id, element) => {
+        cardRefs.current[id] = element;
+    };
+
+    // Toggle card expansion
+    const toggleCardExpansion = (cardId) => {
+        setExpandedCards(prev => ({
+            ...prev,
+            [cardId]: !prev[cardId]
+        }));
+    };
+
+    // Set all cards to expanded or collapsed
+    const toggleAllCards = (expanded) => {
+        const updatedState = {};
+        currentCards.forEach(card => {
+            updatedState[card.id] = expanded;
+        });
+        setExpandedCards(updatedState);
+    };
+
+    // Determine if a card is expanded
+    const isCardExpanded = (cardId) => {
+        return expandedCards[cardId] !== false; // Default to expanded if not set
+    };
+
     return (
         <div className={`
             flex-1 h-full p-6 overflow-y-auto overflow-x-hidden
@@ -20,10 +66,44 @@ const ContentArea = ({
             ${leftPanelOpen ? 'ml-[352px]' : 'ml-16'}
             ${rightPanelOpen ? 'mr-96' : 'mr-16'}
         `}>
-            <div className="max-w-4xl mx-auto">
-                <h1 className="text-2xl font-bold text-gray-800 mb-6">
-                    {currentStage} Phase
-                </h1>
+            <div className="max-w-7xl mx-auto">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold text-gray-800">
+                        {currentStage} Phase
+                    </h1>
+
+                    {/* View controls */}
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => toggleAllCards(true)}
+                            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700"
+                        >
+                            Expand All
+                        </button>
+                        <button
+                            onClick={() => toggleAllCards(false)}
+                            className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700"
+                        >
+                            Collapse All
+                        </button>
+                        <div className="flex rounded-md overflow-hidden border border-gray-200">
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                className={`p-2 ${viewMode === 'grid' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600'}`}
+                                title="Grid View"
+                            >
+                                <HiViewGrid size={20} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`p-2 ${viewMode === 'list' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600'}`}
+                                title="List View"
+                            >
+                                <HiViewList size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Cards for current phase */}
                 {currentCards.length === 0 ? (
@@ -55,37 +135,72 @@ const ContentArea = ({
                         </div>
                     </div>
                 ) : (
-                    <div className="space-y-6">
+                    <div
+                        className={viewMode === 'grid'
+                            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                            : "space-y-6"
+                        }
+                    >
                         {currentCards.map((card) => {
+                            const isExpanded = isCardExpanded(card.id);
+                            const cardProps = {
+                                key: card.id,
+                                onDelete: () => handleDeleteCard(card.id),
+                                onSave: (newData) => handleSaveCard(card.id, newData),
+                                isCollapsed: !isExpanded,
+                                onToggleCollapse: () => toggleCardExpansion(card.id),
+                                ref: (el) => registerCardRef(card.id, el)
+                            };
+
+                            let CardComponent;
                             switch (card.type) {
                                 case 'IS_IS_NOT':
                                     return (
-                                        <IsIsNotCard
+                                        <div
                                             key={card.id}
-                                            data={card.data}
-                                            onDelete={() => handleDeleteCard(card.id)}
-                                            onSave={(newData) => handleSaveCard(card.id, newData)}
-                                        />
+                                            ref={(el) => registerCardRef(card.id, el)}
+                                            className={viewMode === 'grid' && !isExpanded ? "col-span-1" : "col-span-full"}
+                                        >
+                                            <IsIsNotCard
+                                                data={card.data}
+                                                onDelete={() => handleDeleteCard(card.id)}
+                                                onSave={(newData) => handleSaveCard(card.id, newData)}
+                                                isCollapsed={!isExpanded}
+                                                onToggleCollapse={() => toggleCardExpansion(card.id)}
+                                            />
+                                        </div>
                                     );
                                 case 'RICH_TEXT':
                                     return (
-                                        <RichTextCard
+                                        <div
                                             key={card.id}
-                                            initialValue={card.data}
-                                            onDelete={() => handleDeleteCard(card.id)}
-                                            onSave={(newContent) =>
-                                                handleSaveCard(card.id, newContent)
-                                            }
-                                        />
+                                            ref={(el) => registerCardRef(card.id, el)}
+                                            className={viewMode === 'grid' && !isExpanded ? "col-span-1" : "col-span-full"}
+                                        >
+                                            <RichTextCard
+                                                initialValue={card.data}
+                                                onDelete={() => handleDeleteCard(card.id)}
+                                                onSave={(newContent) => handleSaveCard(card.id, newContent)}
+                                                isCollapsed={!isExpanded}
+                                                onToggleCollapse={() => toggleCardExpansion(card.id)}
+                                            />
+                                        </div>
                                     );
                                 case 'SIPOC':
                                     return (
-                                        <SipocCard
+                                        <div
                                             key={card.id}
-                                            data={card.data}
-                                            onDelete={() => handleDeleteCard(card.id)}
-                                            onSave={(newData) => handleSaveCard(card.id, newData)}
-                                        />
+                                            ref={(el) => registerCardRef(card.id, el)}
+                                            className={viewMode === 'grid' && !isExpanded ? "col-span-1" : "col-span-full"}
+                                        >
+                                            <SipocCard
+                                                data={card.data}
+                                                onDelete={() => handleDeleteCard(card.id)}
+                                                onSave={(newData) => handleSaveCard(card.id, newData)}
+                                                isCollapsed={!isExpanded}
+                                                onToggleCollapse={() => toggleCardExpansion(card.id)}
+                                            />
+                                        </div>
                                     );
                                 default:
                                     return null;

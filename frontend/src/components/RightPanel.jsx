@@ -8,7 +8,8 @@ import {
     FaExclamationCircle,
     FaTools,
     FaListAlt,
-    FaClipboardList
+    FaClipboardList,
+    FaArrowRight
 } from 'react-icons/fa';
 import { getPhaseRequirements, getPhaseDescription, getRecommendedTools } from '../utils/phaseRequirements';
 
@@ -16,6 +17,9 @@ const RightPanel = ({
     isOpen,
     setRightPanelOpen,
     currentStage,
+    setCurrentStage,
+    stages,
+    completionPercentage,
     projectData,
     onSave,
     onPhaseComplete,
@@ -109,6 +113,24 @@ const RightPanel = ({
         setActiveTab(null);
     };
 
+    // Handle DMAIC stage click
+    const handleStageClick = (stage) => {
+        if (stage.started) {
+            setCurrentStage(stage.name);
+        }
+    };
+
+    // Get stage styles for DMAIC navigation
+    const getStageStyles = (stage) => {
+        if (stage.completed || (stage.started && currentStage === stage.name)) {
+            return 'bg-purple-500 text-white hover:bg-purple-600';
+        }
+        if (stage.started) {
+            return 'bg-purple-400 text-white hover:bg-purple-500';
+        }
+        return 'bg-slate-700 text-gray-400';
+    };
+
     return (
         <div className="fixed top-16 bottom-0 right-0 flex z-40">
             {/* Main Panel Content */}
@@ -136,6 +158,45 @@ const RightPanel = ({
                         </button>
 
                         <div className="p-5 h-full overflow-y-auto no-scrollbar pt-12">
+                            {/* DMAIC Phase Navigation at the top of the panel */}
+                            <div className="mb-6">
+                                {/* Progress bar */}
+                                <div className="h-1 w-full bg-gray-200 mb-4 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-full bg-indigo-500 rounded-full transition-all duration-300 ease-in-out"
+                                        style={{ width: `${completionPercentage}%` }}
+                                    />
+                                </div>
+
+                                {/* DMAIC Stage Buttons */}
+                                <div className="flex flex-wrap gap-1 mb-4">
+                                    {stages.map((stage, index) => (
+                                        <button
+                                            key={stage.name}
+                                            onClick={() => handleStageClick(stage)}
+                                            disabled={!stage.started}
+                                            className={`
+                                                flex items-center gap-1 px-2 py-1 rounded-md
+                                                transition-all duration-200 text-xs font-medium
+                                                ${getStageStyles(stage)}
+                                                ${stage.started ? 'cursor-pointer' : 'cursor-default'}
+                                            `}
+                                        >
+                                            <span className="w-4 h-4 flex items-center justify-center">
+                                                {stage.completed ? (
+                                                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                ) : (
+                                                    <span className="text-xs">{index + 1}</span>
+                                                )}
+                                            </span>
+                                            <span>{stage.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* Use Radix UI Tabs */}
                             {activeTab && (
                                 <Tabs.Root value={activeTab} defaultValue={activeTab}>
@@ -184,7 +245,7 @@ const RightPanel = ({
                                                         }`}
                                                 >
                                                     Complete Phase
-                                                    <FaChevronRight className="ml-2" />
+                                                    <FaArrowRight className="ml-2" />
                                                 </button>
                                             </div>
                                         </div>

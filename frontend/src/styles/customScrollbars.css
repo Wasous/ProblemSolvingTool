@@ -1,0 +1,64 @@
+/* Custom Scrollbars for DMAIC Pages */
+
+/* Main scrollbar style - thin and elegant */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+/* The track (background) of the scrollbar */
+::-webkit-scrollbar-track {
+    background: rgba(243, 244, 246, 0.6);
+    border-radius: 8px;
+}
+
+/* The draggable scrolling element */
+::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.4);
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+/* When hovering over the thumb */
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.6);
+}
+
+/* For Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.4) rgba(243, 244, 246, 0.6);
+}
+
+/* Specific styling for DMAIC page containers */
+.dmaic-content-area,
+.left-panel-content,
+.right-panel-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.4) rgba(243, 244, 246, 0.6);
+}
+
+/* Hide scrollbars for elements with the .no-scrollbar class */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Always show scrollbar when content overflows */
+.always-scroll {
+    overflow-y: scroll;
+}
+
+/* Horizontal scrollbar styling */
+.horizontal-scroll {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+    height: 4px;
+}

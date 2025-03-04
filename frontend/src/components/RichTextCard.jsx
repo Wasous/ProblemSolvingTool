@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Highlight from '@tiptap/extension-highlight';
@@ -290,7 +290,13 @@ const editorStyles = `
   }
 `;
 
-const RichTextCard = ({ initialValue, onDelete, onSave }) => {
+const RichTextCard = ({
+    initialValue,
+    onDelete,
+    onSave,
+    isCollapsed = false,
+    onToggleCollapse
+}) => {
     const [editionMode, setEditionMode] = useState(initialValue.editionMode || false);
     const [content, setContent] = useState(initialValue);
     const [originalContent, setOriginalContent] = useState(initialValue);
@@ -409,6 +415,29 @@ const RichTextCard = ({ initialValue, onDelete, onSave }) => {
         return text.split(/\s+/).filter(word => word.length > 0).length;
     };
 
+    // Generate a preview text for collapsed state
+    const getPreviewContent = () => {
+        if (!content.content) return "No content";
+
+        // Convert HTML to text
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = content.content;
+        const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+        // Return a preview of the first ~100 characters
+        return (
+            <div className="text-sm">
+                <p className="text-gray-600 line-clamp-3">
+                    {textContent.trim().substring(0, 150)}
+                    {textContent.length > 150 ? '...' : ''}
+                </p>
+                <div className="mt-1 text-xs text-gray-500">
+                    ~{getWordCount()} words
+                </div>
+            </div>
+        );
+    };
+
     return (
         <CardContainer
             title={content.title || 'Untitled Document'}
@@ -420,69 +449,77 @@ const RichTextCard = ({ initialValue, onDelete, onSave }) => {
             onCancel={handleCancel}
             createdAt={initialValue.createdAt}
             updatedAt={initialValue.updatedAt}
+            isCollapsed={isCollapsed}
+            onToggleCollapse={onToggleCollapse}
         >
-            <AnimatePresence mode="wait" initial={false}>
-                {editionMode ? (
-                    <motion.div
-                        key="edit-mode"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                    >
-                        <div className="mb-4">
-                            <input
-                                type="text"
-                                value={content.title || ''}
-                                onChange={(e) => handleTitleChange(e.target.value)}
-                                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-gray-700 font-medium"
-                                placeholder="Document title..."
-                            />
-                        </div>
-
-                        <div className="mb-4 rounded-lg overflow-hidden">
-                            <EditorMenu editor={editor} />
-                            <EditorContent editor={editor} className="transition-all duration-300" />
-                        </div>
-
-                        <div className="mt-2 text-right text-xs text-gray-500">
-                            ~{getWordCount()} words
-                        </div>
-                    </motion.div>
-                ) : (
-                    <motion.div
-                        key="view-mode"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="rich-text-display"
-                    >
-                        {/* Apply both Tailwind prose and our custom ProseMirror-content styles */}
-                        <div
-                            className="ProseMirror-content prose prose-slate max-w-none"
-                            dangerouslySetInnerHTML={{ __html: content.content || '<p>No content</p>' }}
-                        />
-
+            {isCollapsed ? (
+                // Simplified preview content for collapsed state
+                getPreviewContent()
+            ) : (
+                // Full content for expanded state
+                <AnimatePresence mode="wait" initial={false}>
+                    {editionMode ? (
                         <motion.div
-                            initial={{ opacity: 0, y: 5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2, duration: 0.3 }}
-                            className="mt-4 flex justify-between text-xs text-gray-500 border-t border-gray-100 pt-2"
+                            key="edit-mode"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
                         >
-                            <div>
+                            <div className="mb-4">
+                                <input
+                                    type="text"
+                                    value={content.title || ''}
+                                    onChange={(e) => handleTitleChange(e.target.value)}
+                                    className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-gray-700 font-medium"
+                                    placeholder="Document title..."
+                                />
+                            </div>
+
+                            <div className="mb-4 rounded-lg overflow-hidden">
+                                <EditorMenu editor={editor} />
+                                <EditorContent editor={editor} className="transition-all duration-300" />
+                            </div>
+
+                            <div className="mt-2 text-right text-xs text-gray-500">
                                 ~{getWordCount()} words
                             </div>
-                            <button
-                                onClick={handleEdit}
-                                className="text-emerald-600 hover:text-emerald-700 font-medium"
-                            >
-                                Edit document
-                            </button>
                         </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                    ) : (
+                        <motion.div
+                            key="view-mode"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="rich-text-display"
+                        >
+                            {/* Apply both Tailwind prose and our custom ProseMirror-content styles */}
+                            <div
+                                className="ProseMirror-content prose prose-slate max-w-none"
+                                dangerouslySetInnerHTML={{ __html: content.content || '<p>No content</p>' }}
+                            />
+
+                            <motion.div
+                                initial={{ opacity: 0, y: 5 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.2, duration: 0.3 }}
+                                className="mt-4 flex justify-between text-xs text-gray-500 border-t border-gray-100 pt-2"
+                            >
+                                <div>
+                                    ~{getWordCount()} words
+                                </div>
+                                <button
+                                    onClick={handleEdit}
+                                    className="text-emerald-600 hover:text-emerald-700 font-medium"
+                                >
+                                    Edit document
+                                </button>
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            )}
         </CardContainer>
     );
 };

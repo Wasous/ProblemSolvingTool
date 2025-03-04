@@ -12,15 +12,26 @@ import {
     FaCalendarAlt,
     FaClock,
     FaUser,
-    FaCheckCircle
+    FaCheckCircle,
+    FaList,
+    FaSearch
 } from 'react-icons/fa';
 import * as Tabs from '@radix-ui/react-tabs';
 
-const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
+const LeftPanel = ({
+    project,
+    currentStage,
+    isOpen,
+    setIsOpen,
+    currentCards = [],
+    onCardSelect // New prop for card selection
+}) => {
     // Keep track of the active tab, initially null (no tab selected)
     const [activeTab, setActiveTab] = React.useState(null);
     // State to control when to show the close button
     const [showCloseButton, setShowCloseButton] = useState(false);
+    // Search term for filtering cards in the TOC
+    const [searchTerm, setSearchTerm] = useState('');
 
     // Effect to handle the close button appearance after panel animation completes
     useEffect(() => {
@@ -98,11 +109,50 @@ const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
 
     const phaseProgress = calculatePhaseProgress(project.dmaicStages);
 
+    // Filter cards by search term
+    const filteredCards = searchTerm.trim() === ''
+        ? currentCards
+        : currentCards.filter(card =>
+            card.data && card.data.title &&
+            card.data.title.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+    // Group cards by type for better organization
+    const cardGroups = filteredCards.reduce((groups, card) => {
+        const type = card.type || 'Other';
+        if (!groups[type]) {
+            groups[type] = [];
+        }
+        groups[type].push(card);
+        return groups;
+    }, {});
+
+    // Get card type display name
+    const getCardTypeName = (type) => {
+        switch (type) {
+            case 'IS_IS_NOT': return 'IS/IS NOT Analysis';
+            case 'RICH_TEXT': return 'Documents';
+            case 'SIPOC': return 'SIPOC Diagrams';
+            default: return type;
+        }
+    };
+
+    // Get card type icon
+    const getCardTypeIcon = (type) => {
+        switch (type) {
+            case 'IS_IS_NOT': return '⊕';
+            case 'RICH_TEXT': return '¶';
+            case 'SIPOC': return '⊡';
+            default: return '?';
+        }
+    };
+
     // Navigation items
     const navItems = [
         { id: 'home', label: 'Home', icon: FaHome },
         { id: 'info', label: 'Info', icon: FaInfoCircle },
         { id: 'phases', label: 'Phases', icon: FaProjectDiagram },
+        { id: 'contents', label: 'Contents', icon: FaList },
         { id: 'team', label: 'Team', icon: FaUsers },
         { id: 'files', label: 'Files', icon: FaFile },
         { id: 'tasks', label: 'Tasks', icon: FaTasks },
@@ -176,6 +226,18 @@ const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
                                         <PhasesTabContent phaseProgress={phaseProgress} currentStage={currentStage} />
                                     </Tabs.Content>
 
+                                    <Tabs.Content value="contents">
+                                        <ContentsTabContent
+                                            cardGroups={cardGroups}
+                                            currentStage={currentStage}
+                                            onCardSelect={onCardSelect}
+                                            searchTerm={searchTerm}
+                                            setSearchTerm={setSearchTerm}
+                                            getCardTypeIcon={getCardTypeIcon}
+                                            getCardTypeName={getCardTypeName}
+                                        />
+                                    </Tabs.Content>
+
                                     <Tabs.Content value="team">
                                         <TeamTabContent project={project} />
                                     </Tabs.Content>
@@ -197,6 +259,69 @@ const LeftPanel = ({ project, currentStage, isOpen, setIsOpen }) => {
                     </>
                 )}
             </div>
+        </div>
+    );
+};
+
+// New Table of Contents Tab Content
+const ContentsTabContent = ({
+    cardGroups,
+    currentStage,
+    onCardSelect,
+    searchTerm,
+    setSearchTerm,
+    getCardTypeIcon,
+    getCardTypeName
+}) => {
+    return (
+        <div>
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Contents: {currentStage} Phase</h2>
+
+            {/* Search input */}
+            <div className="relative mb-4">
+                <input
+                    type="text"
+                    placeholder="Search cards..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
+
+            {Object.keys(cardGroups).length === 0 ? (
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-gray-500 text-sm">
+                        {searchTerm ? "No cards match your search" : "No cards available yet"}
+                    </p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {Object.entries(cardGroups).map(([type, cards]) => (
+                        <div key={type} className="space-y-2">
+                            <h3 className="text-sm font-medium text-gray-700 flex items-center">
+                                <span className="inline-block w-5 h-5 flex items-center justify-center mr-2 bg-gray-100 rounded text-xs">
+                                    {getCardTypeIcon(type)}
+                                </span>
+                                {getCardTypeName(type)}
+                                <span className="ml-auto text-xs text-gray-500">{cards.length}</span>
+                            </h3>
+
+                            <div className="space-y-1 pl-7">
+                                {cards.map(card => (
+                                    <button
+                                        key={card.id}
+                                        onClick={() => onCardSelect(card.id)}
+                                        className="w-full text-left px-2 py-1.5 rounded text-sm hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                                    >
+                                        {card.data?.title || 'Untitled'}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

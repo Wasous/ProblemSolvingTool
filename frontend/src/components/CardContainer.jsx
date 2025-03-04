@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
-import { HiDotsVertical, HiPencil, HiTrash, HiSave, HiX } from 'react-icons/hi';
+import { HiDotsVertical, HiPencil, HiTrash, HiSave, HiX, HiChevronDown, HiChevronUp } from 'react-icons/hi';
 
 // Animation variants for consistent transitions
 const cardVariants = {
@@ -45,7 +45,9 @@ const CardContainer = ({
     setEditionMode,
     onCancel,
     createdAt,
-    updatedAt
+    updatedAt,
+    isCollapsed = false,
+    onToggleCollapse
 }) => {
     // Ensure we're passing editionMode in the save handler
     const handleSave = () => {
@@ -87,6 +89,17 @@ const CardContainer = ({
         }).format(date);
     };
 
+    // Generate a preview text from the children content
+    const getPreviewContent = () => {
+        // This is a simplified approach - in production, you'd want to extract
+        // meaningful preview text based on the card type
+        return (
+            <div className="text-sm text-gray-500 truncate">
+                Click to expand this card
+            </div>
+        );
+    };
+
     return (
         <LayoutGroup>
             <motion.div
@@ -97,9 +110,11 @@ const CardContainer = ({
                 exit="exit"
                 className={`relative bg-white rounded-xl overflow-hidden shadow-sm border 
                     ${cardTypes[type]?.borderColor || 'border-gray-200'}
-                    transition-shadow hover:shadow-md`}
+                    transition-shadow hover:shadow-md 
+                    ${isCollapsed ? 'cursor-pointer' : ''}`}
                 layoutId={`card-${title}-${type}`}
                 layoutDependency={editionMode}
+                onClick={isCollapsed && !editionMode ? onToggleCollapse : undefined}
             >
                 {/* Card header with gradient background */}
                 <motion.div
@@ -142,15 +157,28 @@ const CardContainer = ({
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     transition={{ duration: 0.2 }}
-                                    className="text-lg font-medium text-gray-800"
+                                    className="text-lg font-medium text-gray-800 flex-grow"
                                 >
                                     {title}
                                 </motion.h2>
                             )}
                         </AnimatePresence>
 
+                        {/* Collapse toggle button - only shown when not editing */}
+                        {!editionMode && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleCollapse();
+                                }}
+                                className="p-1 ml-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-white/50"
+                            >
+                                {isCollapsed ? <HiChevronDown size={20} /> : <HiChevronUp size={20} />}
+                            </button>
+                        )}
+
                         {/* Menu for card actions */}
-                        <div className="ml-auto relative">
+                        <div className="ml-2 relative">
                             <AnimatePresence mode="wait" initial={false}>
                                 {editionMode ? (
                                     <motion.div
@@ -188,7 +216,10 @@ const CardContainer = ({
                                         transition={{ duration: 0.3 }}
                                     >
                                         <button
-                                            onClick={() => setShowMenu(!showMenu)}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowMenu(!showMenu);
+                                            }}
                                             className="p-2 rounded-full hover:bg-white/50 text-gray-500 hover:text-gray-800 transition-colors"
                                             aria-label="Menu"
                                         >
@@ -201,11 +232,9 @@ const CardContainer = ({
                                                     initial={{ opacity: 0, scale: 0.95, y: -5 }}
                                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                                     exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                                                    transition={{
-                                                        duration: 0.2,
-                                                        ease: [0.23, 1, 0.32, 1]
-                                                    }}
+                                                    transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
                                                     className="absolute right-0 top-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-10"
+                                                    onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <button
                                                         onClick={() => {
@@ -236,9 +265,9 @@ const CardContainer = ({
                         </div>
                     </div>
 
-                    {/* Metadata (creation/update date) - only shown when not editing */}
+                    {/* Metadata (creation/update date) - only shown when not editing and not collapsed */}
                     <AnimatePresence>
-                        {!editionMode && (updatedAt || createdAt) && (
+                        {!editionMode && !isCollapsed && (updatedAt || createdAt) && (
                             <motion.div
                                 initial={{ opacity: 0, y: -5 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -257,25 +286,51 @@ const CardContainer = ({
                 </motion.div>
 
                 {/* Card content with animated transitions */}
-                <motion.div
-                    layout="position"
-                    className="p-4"
-                    transition={{
-                        layout: { duration: 0.4, ease: [0.23, 1, 0.32, 1] }
-                    }}
-                >
-                    <AnimatePresence mode="wait" initial={false}>
+                <AnimatePresence initial={false}>
+                    {!isCollapsed && (
                         <motion.div
-                            key={editionMode ? 'edit-content' : 'view-content'}
-                            variants={contentVariants}
-                            initial="initial"
-                            animate="animate"
-                            exit="exit"
+                            layout="position"
+                            className="p-4"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{
+                                opacity: 1,
+                                height: 'auto',
+                                transition: { duration: 0.3, delay: 0.1 }
+                            }}
+                            exit={{
+                                opacity: 0,
+                                height: 0,
+                                transition: { duration: 0.2 }
+                            }}
                         >
-                            {children}
+                            <AnimatePresence mode="wait" initial={false}>
+                                <motion.div
+                                    key={editionMode ? 'edit-content' : 'view-content'}
+                                    variants={contentVariants}
+                                    initial="initial"
+                                    animate="animate"
+                                    exit="exit"
+                                >
+                                    {children}
+                                </motion.div>
+                            </AnimatePresence>
                         </motion.div>
-                    </AnimatePresence>
-                </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Preview content when collapsed */}
+                <AnimatePresence initial={false}>
+                    {isCollapsed && !editionMode && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="px-4 py-2 text-sm text-gray-500"
+                        >
+                            {getPreviewContent()}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </motion.div>
         </LayoutGroup>
     );
